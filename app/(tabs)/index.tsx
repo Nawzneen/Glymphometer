@@ -4,7 +4,7 @@ import { HelloWave } from "@/components/HelloWave";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-
+import { Text } from "react-native";
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
@@ -16,8 +16,11 @@ export default function HomeScreen() {
         />
       }
     >
+      <Text className="text-yellow-700">Ttest</Text>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
+        <ThemedText type="title" className="text-yellow-400">
+          Welcome!
+        </ThemedText>
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
