@@ -109,6 +109,17 @@ function useBLE() {
       console.error(error);
     }
   };
+  const disconnectDevice = async () => {
+    if (connectedDevice) {
+      try {
+        await bleManager.cancelDeviceConnection(connectedDevice.id); // Disconnect the device
+        setConnectedDevice(null); // Reset the connected device
+        console.log("Device Disconnected successfully");
+      } catch (error) {
+        console.log("FAILED TO DISCONNECT", error);
+      }
+    }
+  };
 
   //Helper function to check if a device has already been discovered
   const isDeviceDuplicated = (devices: Device[], newDevice: Device) => {
@@ -134,12 +145,85 @@ function useBLE() {
       }
     });
   };
+  ////
+
+  //Function to start or pause data streaming, specific to GM5
+  // S starts the data streaming, P pauses the data streaming
+  const startOrPauseDataStreaming = async (device: Device, command: string) => {
+    const status = command === "S" ? "Start" : "Paus";
+    if (device) {
+      //Encode the command string to base64
+      const base64Command = base64.encode(command);
+      try {
+        await device.writeCharacteristicWithResponseForService(
+          DATA_SERVICE_UUID,
+          RX_CHARACTERISTIC_UUID,
+          base64Command
+        );
+        console.log(`Deivce ${status}ed`);
+      } catch (error) {
+        console.log(`Device failed to ${status}`, error);
+      }
+    } else {
+      console.log("Device not connected");
+    }
+  };
+
+  // Function data Streaming
+  const dataStreaming = (
+    device: Device,
+    setReceivedData?: (data: string) => void
+  ) => {
+    if (device) {
+      console.log("data streaming started");
+
+      //set the mut to 158 to contain the 153 bytes data from GM5  (the default mut size is 23 bytes, showing only 20bytes of the data)
+      device
+        .requestMTU(158)
+        .then((mtu) => {
+          console.log("MTU size value", mtu.mtu);
+
+          device.monitorCharacteristicForService(
+            DATA_SERVICE_UUID,
+            TX_CHARACTERISTIC_UUID,
+            onDataUpdate() //callback function to handle the data
+          );
+        })
+        .catch((error) => {
+          console.log("MTU negotation failed", error);
+        });
+    }
+  };
+
+  //Callback function to handle the data
+  const onDataUpdate =
+    (setReceivedData?: (data: string) => void) =>
+    (error: BleError | null, characteristic: Characteristic | null) => {
+      if (error) {
+        console.log("Error in receving the data", error);
+        return;
+      }
+      //characteristic.value is a base64 encoded string
+      const encodedData = characteristic?.value;
+      // Decode the Base64 string to a byte array
+      // const decodedData = atob(encodedData);
+      const decodedData = base64.decode(encodedData);
+      // Convert the byte array to a decimal values
+      const decimalValues = [];
+      for (let i = 0; i < decodedData.length; i++) {
+        decimalValues.push(decodedData.charCodeAt(i));
+      }
+    };
+  ////
   return {
+    requestPermissions, // Function to request necessary permissions
     connectToDevice, // Function to connect to GM5 device
     allDevices, // List of all discovered devices
     connectedDevice, // Currently connected device
-    requestPermissions, // Function to request necessary permissions
+    disconnectDevice, // Function to disconnect from the device
     scanForPeripherals, // Function to start scanning for devices
+    startOrPauseDataStreaming, // Function to start or pause data streaming for GM5
+    dataStreaming, // Function to start data streaming for GM5
   };
 }
 
