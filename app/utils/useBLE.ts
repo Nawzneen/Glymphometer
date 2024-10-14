@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 import * as ExpoDevice from "expo-device";
-import { base64 } from "react-native-base64";
+import base64 from "react-native-base64";
 import {
   BleError,
   BleManager,
