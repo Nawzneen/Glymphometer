@@ -1,3 +1,4 @@
+// useBLE.native.ts
 import { useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
 import * as ExpoDevice from "expo-device";
@@ -134,9 +135,9 @@ function useBLE() {
         return;
       }
       //Only handle the devices with specific name for GLymphometer (GM5)
-      if (device?.name === "GM5" || device?.localName) {
+      if ((device && device.name === "GM5") || device?.localName === "GM5") {
         setAllDevices((prevState: Device[]) => {
-          if (device && !isDeviceDuplicated(allDevices, device)) {
+          if (!isDeviceDuplicated(prevState, device)) {
             return [...prevState, device];
             //Add the device if its new
           }
@@ -186,7 +187,7 @@ function useBLE() {
           device.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
             TX_CHARACTERISTIC_UUID,
-            onDataUpdate() //callback function to handle the data
+            onDataUpdate(setReceivedData) //callback function to handle the data
           );
         })
         .catch((error) => {
@@ -213,6 +214,7 @@ function useBLE() {
       for (let i = 0; i < decodedData.length; i++) {
         decimalValues.push(decodedData.charCodeAt(i));
       }
+      setReceivedData?.(decimalValues.join(","));
     };
   ////
   return {
