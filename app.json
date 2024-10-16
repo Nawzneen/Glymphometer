@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.wa2goose.BLEExpoBlog"
     },
     "android": {
+      "jsEngine": "hermes",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -46,6 +47,11 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4933a55d-fb86-4d56-b30a-975a47b34831"
+      }
     }
   }
 }
