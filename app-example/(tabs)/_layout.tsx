@@ -10,17 +10,12 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      // screenOptions={{
-      //   tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-      //   headerShown: false,
-      // }}
       screenOptions={{
-        tabBarActiveTintColor: "orange", // Set the active tab color to orange
-        tabBarInactiveTintColor: "gray", // Set the inactive tab color to gray
-        headerShown: false, // Hide the header for the tabs
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        headerShown: false,
       }}
     >
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="index"
         options={{
           title: "Home",
@@ -31,23 +26,11 @@ export default function TabLayout() {
             />
           ),
         }}
-      /> */}
-      {/* <Tabs.Screen
-        name="test"
-        options={{
-          title: "Test",
-          tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon
-              name={focused ? "code-slash" : "code-slash-outline"}
-              color={color}
-            />
-          ),
-        }}
-      /> */}
+      />
       <Tabs.Screen
-        name="connect"
+        name="results"
         options={{
-          title: "Connect",
+          title: "Results",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "code-slash" : "code-slash-outline"}
@@ -57,9 +40,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="results"
+        name="saved"
         options={{
-          title: "Results",
+          title: "Saved",
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "code-slash" : "code-slash-outline"}
