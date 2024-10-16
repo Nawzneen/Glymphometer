@@ -32,7 +32,7 @@ export default function TabLayout() {
           ),
         }}
       /> */}
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="test"
         options={{
           title: "Test",
@@ -43,7 +43,7 @@ export default function TabLayout() {
             />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="connect"
         options={{
