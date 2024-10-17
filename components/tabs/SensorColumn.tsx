@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 interface SensorColumnProps {
   title: string;
-  isEnabled: boolean;
+  isDataStreaming: boolean;
 }
 const getBackgroundColor = () => {
   const numbers = [10, 20, 30];
@@ -20,9 +20,12 @@ const getBackgroundColor = () => {
 };
 
 // Reusable component for SensorColumn
-const SensorColumn: React.FC<SensorColumnProps> = ({ title, isEnabled }) => {
+const SensorColumn: React.FC<SensorColumnProps> = ({
+  title,
+  isDataStreaming,
+}) => {
   const renderBoxes = () => {
-    const backgroundColor = isEnabled ? getBackgroundColor() : "white";
+    const backgroundColor = isDataStreaming ? getBackgroundColor() : "white";
 
     return [1, 2, 3].map((index) => (
       <View
