@@ -4,12 +4,12 @@ import { TouchableOpacity, Text, StyleSheet } from "react-native";
 const CustomButton = ({
   title = "Click Me", // Default title
   onPress = () => alert("Button Pressed!"), // Default onPress action
-  buttonStyle = {}, // Default button style
+  customButtonStyle = {}, // Default button style
   textStyle = {}, // Default text style
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.button, buttonStyle]} // Combine default and overridden styles
+      style={[styles.button, customButtonStyle]} // Combine default and overridden styles
       onPress={onPress}
     >
       <Text style={[styles.text, textStyle]}>{title}</Text>
@@ -19,12 +19,14 @@ const CustomButton = ({
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#5c5de5",
     padding: 10,
-    borderRadius: 20,
+    borderRadius: 10,
+    display: "flex",
     alignItems: "center",
     justifyContent: "center",
     height: 55,
+    paddingHorizontal: 10,
   },
   text: {
     color: "#fff",
