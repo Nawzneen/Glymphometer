@@ -30,9 +30,6 @@ const getBackgroundColor = () => {
 };
 
 export default function Connect() {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-
   return (
     <View>
       <View className="relative bg-[#000000d7] h-52 w-full flex justify-center items-center ">
@@ -65,25 +62,6 @@ export default function Connect() {
               <Text className="text-black text-base">30°C</Text>
             </View>
           </View>
-        </View>
-      </View>
-      <View className="bg-white flex items-center justify-center mt-5 w-[95%] mx-auto">
-        <View className="mt-10 w-[95%] bg-[#f7f0ba] shadow-lg rounded-lg flex-row items-center justify-between px-5 py-4 mb-2 mx-auto">
-          <Text className="flex-1 text-center font-bold text-sm">
-            Signal Quality
-          </Text>
-          <Switch
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-        </View>
-
-        <View className="rounded-lg flex-row justify-center w-[95%] h-48 bg-[aliceblue] shadow-lg">
-          <SensorColumn title="NIRS 1" isEnabled={isEnabled} />
-          <SensorColumn title="NIRS 2" isEnabled={isEnabled} />
-          <SensorColumn title="NIRS 3" isEnabled={isEnabled} />
         </View>
       </View>
     </View>
