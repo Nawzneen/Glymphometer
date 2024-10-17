@@ -10,7 +10,7 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <View style={styles.container}>
+    <View className="flex flex-1 bg-gray-100">
       {/* Custom Header Component */}
       <Header title="Glymphometer" />
 
@@ -50,10 +50,3 @@ export default function TabLayout() {
     </View>
   );
 }
-
-// Add some basic styles for the layout
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
