@@ -1,6 +1,10 @@
 // useBLE.native.ts
 import { useState } from "react";
 import { PermissionsAndroid, Platform } from "react-native";
+import {
+  discoverBLEServicesCharactristics,
+  readBatteryLevel,
+} from "./bleCharacteristics";
 import * as ExpoDevice from "expo-device";
 import base64 from "react-native-base64";
 import {
@@ -90,21 +94,19 @@ function useBLE() {
   //Function to connect to a BLE device
   const connectToDevice = async (device: Device) => {
     try {
-      const deviceConnection = await bleManager.connectToDevice(device.id); // Connect to the device using its ID
-      await deviceConnection.discoverAllServicesAndCharacteristics(); // Discover all services and characteristics of the device
+      // Connect to the device using its ID
+      const deviceConnection = await bleManager.connectToDevice(device.id);
 
-      ////// check to see UUID of the services and characteristics if you don't already know
-      const services = await deviceConnection.services(); // Get all services of the device
-      for (const service of services) {
-        const characteristics =
-          await deviceConnection.characteristicsForService(service.uuid); // Get all characteristics of the service
-        for (const characteristic of characteristics) {
-          // console.log("Characteristic UUID:", characteristic.uuid);
-        }
-      }
-      //   set the connected device
-      setConnectedDevice(deviceConnection); //Save the connected device
-      bleManager.stopDeviceScan(); // Stop scanning for devices once connected
+      // // Discover all services and characteristics of the device
+      // await discoverBLEServicesCharactristics(deviceConnection);
+
+      // //Read the battery level of the device
+      // await readBatteryLevel(deviceConnection);
+
+      // set the connected device state
+      setConnectedDevice(deviceConnection);
+      // Stop scanning for devices once connected
+      bleManager.stopDeviceScan();
     } catch (error) {
       console.log("FAILED TO CONNECT", error);
       console.error(error);
@@ -204,19 +206,24 @@ function useBLE() {
         console.log("Error in receving the data", error);
         return;
       }
-      //characteristic.value is a base64 encoded string
-      const encodedData = characteristic?.value;
-      // Decode the Base64 string to a byte array
-      // const decodedData = atob(encodedData);
-      const decodedData = base64.decode(encodedData);
-      // Convert the byte array to a decimal values
-      const decimalValues = [];
-      for (let i = 0; i < decodedData.length; i++) {
-        decimalValues.push(decodedData.charCodeAt(i));
+      if (characteristic && characteristic.value) {
+        //characteristic.value is a base64 encoded string
+        const encodedData = characteristic.value;
+        // Decode the Base64 string to a byte array
+        // const decodedData = atob(encodedData);
+        const decodedData = base64.decode(encodedData);
+        // Convert the byte array to a decimal values
+        const decimalValues = [];
+        for (let i = 0; i < decodedData.length; i++) {
+          decimalValues.push(decodedData.charCodeAt(i));
+        }
+        setReceivedData?.(decimalValues.join(","));
+      } else {
+        console.error("Characteristic value is null or undefined.");
       }
-      setReceivedData?.(decimalValues.join(","));
     };
   ////
+
   return {
     requestPermissions, // Function to request necessary permissions
     connectToDevice, // Function to connect to GM5 device
