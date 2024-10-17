@@ -5,10 +5,11 @@ import {
   Modal,
   SafeAreaView,
   Text,
-  StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { Device } from "react-native-ble-plx";
+import CustomButton from "./CustomButton";
 
 type DeviceModalListItemProps = {
   item: ListRenderItemInfo<Device>;
@@ -30,16 +31,15 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
     connectToPeripheral(item.item);
     closeModal();
   }, [closeModal, connectToPeripheral, item.item]);
-
   return (
-    <TouchableOpacity
-      onPress={connectAndCloseModal}
-      style={modalStyle.ctaButton}
-    >
-      <Text style={modalStyle.ctaButtonText}>
-        {item.item.name ?? item.item.localName}
-      </Text>
-    </TouchableOpacity>
+    <View className="flex flex-1 justify-center items-center">
+      <CustomButton
+        title="GM5"
+        onPress={connectAndCloseModal}
+        customButtonStyle={{ backgroundColor: "#5c5de5", width: 150 }}
+        textStyle={{ color: "white" }}
+      />
+    </View>
   );
 };
 
@@ -61,67 +61,52 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
 
   return (
     <Modal
-      style={modalStyle.modalContainer}
       animationType="slide"
-      transparent={false}
+      transparent={true} // Make the background transparent
       visible={visible}
     >
-      <SafeAreaView style={modalStyle.modalTitle}>
-        <Text style={modalStyle.modalTitleText}>
-          Tap on a device to connect
-        </Text>
-        <FlatList
-          contentContainerStyle={modalStyle.modalFlatlistContiner}
-          data={devices}
-          renderItem={renderDeviceModalListItem}
-        />
-      </SafeAreaView>
+      {/* Background overlay */}
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={closeModal} // Close modal on outside press
+        className="flex-1 bg-black/90 justify-center items-center"
+      >
+        {/* Modal content */}
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[90%] h-[70%] bg-white rounded-lg overflow-hidden"
+        >
+          <SafeAreaView className="flex-1 bg-[#ffffff]">
+            <Text className="mt-10 text-xl font-bold mx-5 text-center text-primary-font-color">
+              Tap on a device to connect
+            </Text>
+            {/* in case of an error */}
+            {/* <Text className="text-center text-red-600 mt-4">
+              Turn on your phone's Bluetooth!
+            </Text> */}
+            <Text className="text-base mx-6 my-4 text-primary-font-color">
+              If you don't see the Glymphometer name here, make sure your Phones
+              bluetooth is on. Try to turn on and off the Glymphometer one time.
+              Glymphometer needs all the permissions that is asked.
+            </Text>
+            <FlatList
+              contentContainerStyle={{ flex: 1, justifyContent: "center" }}
+              data={devices}
+              renderItem={renderDeviceModalListItem}
+            />
+            {/* <View className="flex flex-1 justify-center items-center">
+              <CustomButton
+                title="GM5"
+                // onPress={connectAndCloseModal}
+                customButtonStyle={{ backgroundColor: "#5c5de5", width: 150 }}
+                textStyle={{ color: "white" }}
+              />
+            </View> */}
+          </SafeAreaView>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 };
-
-const modalStyle = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
-  modalFlatlistContiner: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  modalCellOutline: {
-    borderWidth: 1,
-    borderColor: "black",
-    alignItems: "center",
-    marginHorizontal: 20,
-    paddingVertical: 15,
-    borderRadius: 8,
-  },
-  modalTitle: {
-    flex: 1,
-    backgroundColor: "#f2f2f2",
-  },
-  modalTitleText: {
-    marginTop: 40,
-    fontSize: 30,
-    fontWeight: "bold",
-    marginHorizontal: 20,
-    textAlign: "center",
-  },
-  ctaButton: {
-    backgroundColor: "#FF6060",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    marginHorizontal: 20,
-    marginBottom: 5,
-    borderRadius: 8,
-  },
-  ctaButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-});
 
 export default DeviceModal;
