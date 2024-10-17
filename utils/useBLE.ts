@@ -96,8 +96,9 @@ function useBLE() {
     try {
       // Connect to the device using its ID
       const deviceConnection = await bleManager.connectToDevice(device.id);
+      console.log("Device Connected successfully", deviceConnection.id);
 
-      // // Discover all services and characteristics of the device
+      // Discover all services and characteristics of the device
       // await discoverBLEServicesCharactristics(deviceConnection);
 
       // //Read the battery level of the device
@@ -108,7 +109,7 @@ function useBLE() {
       // Stop scanning for devices once connected
       bleManager.stopDeviceScan();
     } catch (error) {
-      console.log("FAILED TO CONNECT", error);
+      console.log("GM5 FAILED TO CONNECT", error);
       console.error(error);
     }
   };
@@ -153,7 +154,7 @@ function useBLE() {
   //Function to start or pause data streaming, specific to GM5
   // S starts the data streaming, P pauses the data streaming
   const startOrPauseDataStreaming = async (device: Device, command: string) => {
-    const status = command === "S" ? "Start" : "Paus";
+    const status = command === "S" ? "Start" : "Pause";
     if (device) {
       //Encode the command string to base64
       const base64Command = base64.encode(command);
@@ -165,7 +166,7 @@ function useBLE() {
         );
         console.log(`Deivce ${status}ed`);
       } catch (error) {
-        console.log(`Device failed to ${status}`, error);
+        console.log(`Data streaming failed to ${status}`, error);
       }
     } else {
       console.log("Device not connected");
@@ -184,7 +185,7 @@ function useBLE() {
       device
         .requestMTU(158)
         .then((mtu) => {
-          console.log("MTU size value", mtu.mtu);
+          // console.log("MTU size value", mtu.mtu);
 
           device.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
@@ -218,6 +219,7 @@ function useBLE() {
           decimalValues.push(decodedData.charCodeAt(i));
         }
         setReceivedData?.(decimalValues.join(","));
+        console.log("Data Received", decimalValues.join(","));
       } else {
         console.error("Characteristic value is null or undefined.");
       }
