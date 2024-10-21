@@ -5,11 +5,14 @@ interface HeaderProps {
   onButtonPress?: () => void;
 }
 const Header: React.FC<HeaderProps> = ({ title = "My App", onButtonPress }) => (
-  <View className="mb-8 px-4 h-16 bg-primary-color text-white flex  shadow-black shadow-lg flex-row justify-between items-center ">
-    <Text className="text-center text-white font-bold text-xl">{title}</Text>
-    <View className="flex flex-row gap-x-2">
-      <View className="rounded-full bg-green-800 w-[30px] h-[30px]" />
-      <Text className="text-center text-white font-bold text-xl">30%</Text>
+  <View className="relative mb-8 px-4 h-16  flex flex-row justify-between items-center bg-primary-text-color ">
+    <View className="absolute shadow-black shadow-2xl" />
+    <Text className="text-center font-bold text-xl text-light-text-color">
+      {title}
+    </Text>
+    <View className="flex flex-row items-center justify-center gap-x-2 text-base">
+      <View className="rounded-full bg-success-color w-[25px] h-[25px]" />
+      <Text className="text-center font-bold text-light-text-color">30%</Text>
     </View>
 
     {/* {onButtonPress && (
@@ -19,12 +22,5 @@ const Header: React.FC<HeaderProps> = ({ title = "My App", onButtonPress }) => (
     )} */}
   </View>
 );
-
-const styles = StyleSheet.create({
-  button: {
-    color: "#fff",
-    fontSize: 16,
-  },
-});
 
 export default Header;

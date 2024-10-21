@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomButton from "../../components/CustomButton";
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 
 import DeviceModal from "../../components/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
@@ -53,35 +47,26 @@ export default function index() {
   };
   const handleDataStreamingToggle = (value: boolean) => {
     setIsDataStreaming(value);
-    if (value) {
-      console.log("start data streaming");
-      startOrPauseDataStreaming(connectedDevice, "S");
-      dataStreaming(connectedDevice, setReceivedData);
-    } else {
-      console.log("stop data streaming");
-
-      startOrPauseDataStreaming(connectedDevice, "P");
+    if (connectedDevice) {
+      if (value) {
+        console.log("start data streaming");
+        startOrPauseDataStreaming(connectedDevice, "S");
+        dataStreaming(connectedDevice, setReceivedData);
+      } else {
+        console.log("stop data streaming");
+        startOrPauseDataStreaming(connectedDevice, "P");
+      }
     }
   };
 
   return (
-    <SafeAreaView className="flex flex-1 bg-gray-100">
+    <SafeAreaView className="flex flex-1 bg-background-color">
       <View className="flex flex-row gap-x-2 items-center justify-center  ">
         <View>
-          <CustomButton
-            title="Connect to GM5"
-            onPress={openModal}
-            customButtonStyle={{ backgroundColor: "#5c5de5" }}
-            textStyle={{ color: "white" }}
-          />
+          <CustomButton title="Connect to GM5" onPress={openModal} />
         </View>
         <View>
-          <CustomButton
-            title="Open Saved Data"
-            onPress={scanForDevices}
-            customButtonStyle={{ backgroundColor: "#5c5de5" }}
-            textStyle={{ color: "white" }}
-          />
+          <CustomButton title="Open Saved Data" onPress={scanForDevices} />
         </View>
       </View>
       <View className="">
@@ -91,10 +76,7 @@ export default function index() {
               <Text className="text-xl font-bold text-primary-color">
                 GM5 is {isConnected ? "Connected" : "Disconnected"}
               </Text>
-              <TouchableOpacity
-                // onPress={disconnectDevice}
-                className="ml-2"
-              >
+              <TouchableOpacity onPress={disconnectDevice} className="ml-2">
                 <Ionicons
                   name="refresh"
                   size={24}
@@ -139,12 +121,14 @@ export default function index() {
             />
 
             {receivedData && (
-              <Text>Data is going to be here: {receivedData}</Text>
+              <Text className="px-1 text-secondary-text-color">
+                GMeter Data streaming : {receivedData}
+              </Text>
             )}
           </>
         ) : (
-          <Text className="mt-16 text-primary-color text-center font-bold text-2xl px-4">
-            Please connect your phone to Gmeter
+          <Text className="mt-16 text-primary-text-color text-center font-bold text-2xl px-4">
+            Please connect your phone to Gmeter.
           </Text>
         )}
       </View>
@@ -161,31 +145,3 @@ export default function index() {
     </SafeAreaView>
   );
 }
-const styles = StyleSheet.create({
-  heartRateTitleText: {
-    fontSize: 30,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginHorizontal: 20,
-    color: "black",
-  },
-  heartRateText: {
-    fontSize: 25,
-    marginTop: 15,
-  },
-  ctaCustomButton: {
-    backgroundColor: "#FF6060",
-    justifyContent: "center",
-    alignItems: "center",
-    height: 50,
-    marginHorizontal: 20,
-    marginBottom: 5,
-    borderRadius: 8,
-    paddingHorizontal: 20,
-  },
-  ctaCustomButtonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "white",
-  },
-});

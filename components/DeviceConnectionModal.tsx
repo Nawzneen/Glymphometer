@@ -77,14 +77,14 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
           className="w-[90%] h-[70%] bg-white rounded-lg overflow-hidden"
         >
           <SafeAreaView className="flex-1 bg-[#ffffff]">
-            <Text className="mt-10 text-xl font-bold mx-5 text-center text-primary-font-color">
+            <Text className="mt-10 text-xl font-bold mx-5 text-center text-primary-text-color">
               Tap on a device to connect
             </Text>
             {/* in case of an error */}
             {/* <Text className="text-center text-red-600 mt-4">
               Turn on your phone's Bluetooth!
             </Text> */}
-            <Text className="text-base mx-6 my-4 text-primary-font-color">
+            <Text className="text-base mx-6 my-4 text-primary-text-color">
               If you don't see the Glymphometer name here, make sure your Phones
               bluetooth is on. Try to turn on and off the Glymphometer one time.
               Glymphometer needs all the permissions that is asked.
