@@ -99,7 +99,7 @@ function useBLE() {
       console.log("Device Connected successfully", deviceConnection.id);
 
       // Discover all services and characteristics of the device
-      // await discoverBLEServicesCharactristics(deviceConnection);
+      await discoverBLEServicesCharactristics(deviceConnection);
 
       // //Read the battery level of the device
       // await readBatteryLevel(deviceConnection);
