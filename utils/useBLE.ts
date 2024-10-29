@@ -184,12 +184,11 @@ function useBLE() {
     if (device) {
       console.log("data streaming started");
 
-      //set the mut to 158 to contain the 153 bytes data from GM5  (the default mut size is 23 bytes, showing only 20bytes of the data)
+      //set the mut to 512 to contain the 509 bytes data from GM5  (the default mut size is 23 bytes, showing only 20bytes of the data)
       device
-        .requestMTU(158)
+        .requestMTU(512)
         .then((mtu) => {
           // console.log("MTU size value", mtu.mtu);
-
           device.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
             TX_CHARACTERISTIC_UUID,
