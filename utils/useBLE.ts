@@ -137,8 +137,11 @@ function useBLE() {
         console.log("Error in Scanning for peripherals", error);
         return;
       }
-      //Only handle the devices with specific name for GLymphometer (GM5)
-      if ((device && device.name === "GM5") || device?.localName === "GM5") {
+      //Only handle the devices with specific name for GLymphometer (GM5) and everything comes after it such as GM5-1, GM5-2, etc
+      if (
+        (device && device.name?.startsWith("GM5")) ||
+        device?.localName?.startsWith("GM5")
+      ) {
         setAllDevices((prevState: Device[]) => {
           if (!isDeviceDuplicated(prevState, device)) {
             return [...prevState, device];
