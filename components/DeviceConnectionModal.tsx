@@ -26,7 +26,6 @@ type DeviceModalProps = {
 
 const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
   const { item, connectToPeripheral, closeModal } = props;
-
   const connectAndCloseModal = useCallback(() => {
     connectToPeripheral(item.item);
     closeModal();
@@ -34,9 +33,9 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
   return (
     <View className="flex flex-1 justify-center items-center">
       <CustomButton
-        title="GM5"
+        title={item.item.name || item.item.localName || "Unknown Device"}
         onPress={connectAndCloseModal}
-        customButtonStyle={{ backgroundColor: "#5c5de5", width: 150 }}
+        customButtonStyle={{ width: 300 }}
         textStyle={{ color: "white" }}
       />
     </View>
