@@ -10,11 +10,11 @@ const getBackgroundColor = () => {
   let value = numbers[randomIndex];
   let color;
   if (value === 10) {
-    color = "red";
+    color = "#FFEB3B";
   } else if (value === 20) {
-    color = "yellow";
+    color = "#F44336";
   } else if (value === 30) {
-    color = "green";
+    color = "#4CAF50";
   }
   return color;
 };
@@ -25,20 +25,20 @@ const SensorColumn: React.FC<SensorColumnProps> = ({
   isDataStreaming,
 }) => {
   const renderBoxes = () => {
-    const backgroundColor = isDataStreaming ? getBackgroundColor() : "white";
+    const backgroundColor = isDataStreaming ? getBackgroundColor() : "#B0B0B0";
 
-    return [1, 2, 3].map((index) => (
+    return [1, 2, 3, 4].map((index) => (
       <View
         key={index}
-        className="rounded-full border border-gray-600 border-1 w-[50px] h-[50px] "
+        className={` border  border-gray-200 w-[50px] h-[50px] `}
         style={{ backgroundColor }}
       />
     ));
   };
 
   return (
-    <View className="grid gap-x-1 gap-y-1 items-center">
-      <Text>{title}</Text>
+    <View className="grid items-center my-4">
+      <Text className="mb-4">{title}</Text>
       {renderBoxes()}
     </View>
   );
