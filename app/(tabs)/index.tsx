@@ -74,47 +74,25 @@ export default function index() {
           <>
             <View className="mt-16 flex-row flex gap-x-1 justify-center items-center">
               <Text className="text-xl font-bold text-primary-color">
-                GM5 is {isConnected ? "Connected" : "Disconnected"}
+                {connectedDevice.name} is{" "}
+                {isConnected ? "Connected" : "Disconnected"}
               </Text>
-              <TouchableOpacity onPress={disconnectDevice} className="ml-2">
+              {/* <TouchableOpacity onPress={disconnectDevice} className="ml-2">
                 <Ionicons
                   name="refresh"
                   size={24}
                   color="black"
                   className="ml-2"
                 />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={disconnectDevice} className="ml-2">
+              </TouchableOpacity> */}
+              <TouchableOpacity
+                onPress={disconnectDevice}
+                className="ml-2 bg-gray-200 p-2 rounded-full"
+              >
                 <AntDesign name="disconnect" size={24} color="black" />
               </TouchableOpacity>
             </View>
 
-            <View className="flex flex-row justify-center items-center gap-x-2 mt-8 ">
-              {/* {isDataStreaming ? ( 
-              <>
-                <View>
-                  <CustomButton
-                    title="Pause Streaming Data"
-                    customButtonStyle={{}}
-                    onPress={() => {
-                      startOrPauseDataStreaming(connectedDevice, "P");
-                      // dataStreaming(connectedDevice, setReceivedData);
-                    }}
-                  />
-                </View>
-              </>
-              ) : ( 
-              <View>
-                <CustomButton
-                  title="Start Streaming Data "
-                  onPress={() => {
-                    startOrPauseDataStreaming(connectedDevice, "S"),
-                      dataStreaming(connectedDevice, setReceivedData);
-                  }}
-                />
-              </View>
-              )}  */}
-            </View>
             <SignalQuality
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}

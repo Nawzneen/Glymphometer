@@ -15,17 +15,17 @@ async function discoverBLEServicesCharactristics(deviceConnection: Device) {
 
     // Loop through each characteristic and log properties
     for (const characteristic of characteristics) {
-      console.log(
-        "Characteristic UUID:",
-        characteristic.uuid,
-        "Readable:",
-        characteristic.isReadable,
-        "Writable:",
-        characteristic.isWritableWithResponse ||
-          characteristic.isWritableWithoutResponse,
-        "Notifiable:",
-        characteristic.isNotifiable
-      );
+      // console.log(
+      //   "Characteristic UUID:",
+      //   characteristic.uuid,
+      //   "Readable:",
+      //   characteristic.isReadable,
+      //   "Writable:",
+      //   characteristic.isWritableWithResponse ||
+      //     characteristic.isWritableWithoutResponse,
+      //   "Notifiable:",
+      //   characteristic.isNotifiable
+      // );
     }
     //Log the Service UUID
     console.log("Service UUID:", service.uuid);
