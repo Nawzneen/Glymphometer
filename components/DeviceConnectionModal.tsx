@@ -31,7 +31,7 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
     closeModal();
   }, [closeModal, connectToPeripheral, item.item]);
   return (
-    <View className="flex flex-1 justify-center items-center">
+    <View className="flex flex-1 justify-center items-center mt-2">
       <CustomButton
         title={item.item.name || item.item.localName || "Unknown Device"}
         onPress={connectAndCloseModal}
@@ -44,6 +44,7 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
 
 const DeviceModal: FC<DeviceModalProps> = (props) => {
   const { devices, visible, connectToPeripheral, closeModal } = props;
+  console.log(devices, "devices");
 
   const renderDeviceModalListItem = useCallback(
     (item: ListRenderItemInfo<Device>) => {
@@ -89,9 +90,13 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
               Glymphometer needs all the permissions that is asked.
             </Text>
             <FlatList
-              contentContainerStyle={{ flex: 1, justifyContent: "center" }}
+              contentContainerStyle={{
+                paddingVertical: 20,
+                marginVertical: 10,
+              }}
               data={devices}
               renderItem={renderDeviceModalListItem}
+              keyExtractor={(item) => item.id}
             />
             {/* <View className="flex flex-1 justify-center items-center">
               <CustomButton
