@@ -31,7 +31,7 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
     closeModal();
   }, [closeModal, connectToPeripheral, item.item]);
   return (
-    <View className="flex flex-1 justify-center items-center mt-2">
+    <View className="flex justify-center items-center my-2">
       <CustomButton
         title={item.item.name || item.item.localName || "Unknown Device"}
         onPress={connectAndCloseModal}
@@ -44,7 +44,6 @@ const DeviceModalListItem: FC<DeviceModalListItemProps> = (props) => {
 
 const DeviceModal: FC<DeviceModalProps> = (props) => {
   const { devices, visible, connectToPeripheral, closeModal } = props;
-  console.log(devices, "devices");
 
   const renderDeviceModalListItem = useCallback(
     (item: ListRenderItemInfo<Device>) => {

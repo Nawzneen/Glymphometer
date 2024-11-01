@@ -28,7 +28,7 @@ async function discoverBLEServicesCharactristics(deviceConnection: Device) {
       // );
     }
     //Log the Service UUID
-    console.log("Service UUID:", service.uuid);
+    // console.log("Service UUID:", service.uuid);
   }
 }
 
