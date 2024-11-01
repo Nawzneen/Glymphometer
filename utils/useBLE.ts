@@ -6,7 +6,12 @@ import { PermissionsAndroid, Platform } from "react-native";
 import { discoverBLEServicesCharactristics } from "./bleCharacteristics";
 import * as ExpoDevice from "expo-device";
 import base64 from "react-native-base64";
-import { BleError, Device, Characteristic } from "react-native-ble-plx";
+import {
+  BleError,
+  Device,
+  Characteristic,
+  Subscription,
+} from "react-native-ble-plx";
 import bleManager from "./bleManager";
 import { Alert } from "react-native";
 
@@ -19,8 +24,27 @@ function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
   // Initialization and BLE State Listener
+
+  //If devices is disconnected or turned off, set the connected device to null
   useEffect(() => {
-    const subscription = bleManager.onStateChange((state) => {
+    let disconnectSubscription: Subscription | undefined;
+    if (connectedDevice) {
+      disconnectSubscription = connectedDevice.onDisconnected(
+        (error, device) => {
+          console.log("Device disconnected", device.id);
+          setConnectedDevice(null);
+        }
+      );
+    }
+    return () => {
+      if (disconnectSubscription) {
+        disconnectSubscription.remove();
+      }
+    };
+  }, [connectedDevice]);
+
+  useEffect(() => {
+    const subscription: Subscription = bleManager.onStateChange((state) => {
       console.log("BLE State:", state);
       if (state === "PoweredOn") {
         // Optionally start scanning automatically
@@ -49,7 +73,8 @@ function useBLE() {
         console.log("Connected devicess:", devices);
         if (devices.length > 0) {
           setConnectedDevice(devices[0]);
-          allDevices.push(devices[0]);
+          const newDevice = devices[0];
+          setAllDevices((prevDevices) => [...prevDevices, newDevice]);
           console.log("Found connected devicees:", devices[0].id);
         }
       } catch (error) {
@@ -175,7 +200,7 @@ function useBLE() {
       }
       //Only handle the devices with specific name for GLymphometer (GM5) and everything comes after it such as GM5-1, GM5-2, etc
       if (
-        (device && device.name?.startsWith("GM5")) ||
+        device?.name?.startsWith("GM5") ||
         device?.localName?.startsWith("GM5")
       ) {
         setAllDevices((prevState: Device[]) => {
