@@ -87,8 +87,11 @@ function useBLE() {
 
   //FUNCTION TO CONNECT TO THE BLE DEVICE
   const connectToDevice = async (device: Device) => {
+    if (connectedDevice) {
+      await disconnectDevice(); // Disconnect the currently connected device when requesting a new connection
+    }
     try {
-      // Connect to the device using its ID
+      // Connect to the device using its ID by a methode provided by blemanager
       const deviceConnection = await bleManager.connectToDevice(device.id);
       console.log("Device Connected successfully", deviceConnection.id);
 
