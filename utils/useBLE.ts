@@ -25,6 +25,7 @@ const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Rec
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
+  const [startDataStreaming, setStartDataStreaming] = useState<boolean>(false); //Track data streaming status
   // Initialization and BLE State Listener
 
   //If devices is disconnected or turned off, set the connected device to null
@@ -187,7 +188,7 @@ function useBLE() {
 
   //FUNCTION TO TOGGLE DATA STREAMING, SPECIFIC TO GM5
   // S starts the data streaming, P pauses the data streaming
-  const startOrPauseDataStreaming = async (device: Device, command: string) => {
+  const toggleDataStreaming = async (device: Device, command: string) => {
     const status = command === "S" ? "Start" : "Pause";
     if (device) {
       //Encode the command string to base64
@@ -269,7 +270,7 @@ function useBLE() {
     connectedDevice, // Currently connected device
     disconnectDevice, // Function to disconnect from the device
     scanForPeripherals, // Function to start scanning for devices
-    startOrPauseDataStreaming, // Function to start or pause data streaming for GM5
+    toggleDataStreaming, // Function to start or pause data streaming for GM5
     dataStreaming, // Function to start data streaming for GM5
   };
 }

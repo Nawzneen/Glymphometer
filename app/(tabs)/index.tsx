@@ -13,7 +13,7 @@ export default function index() {
     connectedDevice,
     connectToDevice,
     disconnectDevice,
-    startOrPauseDataStreaming,
+    toggleDataStreaming,
     requestPermissions,
     scanForPeripherals,
     dataStreaming,
@@ -50,11 +50,11 @@ export default function index() {
     if (connectedDevice) {
       if (value) {
         console.log("start data streaming");
-        startOrPauseDataStreaming(connectedDevice, "S");
+        toggleDataStreaming(connectedDevice, "S");
         dataStreaming(connectedDevice, setReceivedData);
       } else {
         console.log("stop data streaming");
-        startOrPauseDataStreaming(connectedDevice, "P");
+        toggleDataStreaming(connectedDevice, "P");
       }
     }
   };
