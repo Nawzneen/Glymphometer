@@ -1,11 +1,12 @@
 // useBLE.native.ts
 ////////////////////////////////////////////////
 import * as FileSystem from "expo-file-system";
+import { handleError } from "./handleError";
+import Toast from "react-native-toast-message";
+import ToastMessages from "@/components/ToastMessages";
 import { requestPermissions } from "./requestPermissions";
 import { useEffect, useState } from "react";
-import { PermissionsAndroid, Platform } from "react-native";
 import { discoverBLEServicesCharactristics } from "./bleCharacteristics";
-import * as ExpoDevice from "expo-device";
 import base64 from "react-native-base64";
 import {
   BleError,
@@ -32,8 +33,14 @@ function useBLE() {
     if (connectedDevice) {
       disconnectSubscription = connectedDevice.onDisconnected(
         (error, device) => {
-          console.log("Device disconnected", device.id);
+          // console.log("Device disconnected", device.id);
           setConnectedDevice(null);
+          Toast.show({
+            type: "success",
+            text1: "Disconnected",
+            text2: `Disconnected from ${connectedDevice.name}`,
+            position: "top",
+          });
         }
       );
     }
@@ -77,9 +84,15 @@ function useBLE() {
           const newDevice = devices[0];
           setAllDevices((prevDevices) => [...prevDevices, newDevice]);
           console.log("Found connected devicees:", devices[0].id);
+          Toast.show({
+            type: "success",
+            text1: "Found connected devicees",
+            text2: `Found connected devicees:  ${devices[0].name}`,
+            position: "top",
+          });
         }
-      } catch (error) {
-        console.error("Error fetching connected devices:", error);
+      } catch (error: unknown) {
+        handleError(error, "Error fetching connected devices");
       }
     };
     fetchConnectedDevices();
@@ -93,7 +106,12 @@ function useBLE() {
     try {
       // Connect to the device using its ID by a methode provided by blemanager
       const deviceConnection = await bleManager.connectToDevice(device.id);
-      console.log("Device Connected successfully", deviceConnection.id);
+      Toast.show({
+        type: "success",
+        text1: "Device Connected successfully",
+        text2: `Device Connected successfully:  ${deviceConnection.name}`,
+        position: "top",
+      });
 
       // Discover all services and characteristics of the device
       await discoverBLEServicesCharactristics(deviceConnection);
@@ -102,25 +120,35 @@ function useBLE() {
       setConnectedDevice(deviceConnection);
       // Stop scanning for devices once connected
       bleManager.stopDeviceScan();
-    } catch (error) {
-      console.log("GM5 FAILED TO CONNECT", error);
-      console.error(error);
+    } catch (error: unknown) {
+      handleError(error, "Error connecting to device");
     }
   };
 
   //FUNCTION TO DISCONNECT TO THE BLE DEVICE
   const disconnectDevice = async () => {
-    console.log("Disconnecting device running");
     if (!connectedDevice) {
-      console.log("No device connected to disconnect");
+      Toast.show({
+        type: "info",
+        text1: "No Device Connected",
+        text2: "There is no device currently connected.",
+        position: "top",
+      });
       return;
     }
     try {
       await bleManager.cancelDeviceConnection(connectedDevice.id); // Disconnect the device
       setConnectedDevice(null); // Reset the connected device
-      console.log("Device Disconnected successfully");
-    } catch (error) {
-      console.log("FAILED TO DISCONNECT", error);
+      Toast.show({
+        type: "success",
+        text1: "Disconnected",
+        text2: `Disconnected from ${
+          connectedDevice.name || connectedDevice.id
+        }`,
+        position: "top",
+      });
+    } catch (error: unknown) {
+      handleError(error, "Error disconnecting from device");
     }
   };
 
@@ -131,25 +159,29 @@ function useBLE() {
 
   //FUNCTION TO START SCANNING FOR PERIPHERALS
   const scanForPeripherals = () => {
-    bleManager.startDeviceScan(null, null, (error, device) => {
-      if (error) {
-        console.log("Error in Scanning for peripherals", error);
-        return;
+    bleManager.startDeviceScan(
+      null,
+      null,
+      (error: BleError | null, device: Device | null) => {
+        if (error) {
+          handleError(error, "Scanning for Peripherals");
+          return;
+        }
+        //Only handle the devices with specific name for GLymphometer (GM5) and everything comes after it such as GM5-1, GM5-2, etc
+        if (
+          device?.name?.startsWith("GM5") ||
+          device?.localName?.startsWith("GM5")
+        ) {
+          setAllDevices((prevState: Device[]) => {
+            if (!isDeviceDuplicated(prevState, device)) {
+              return [...prevState, device];
+              //Add the device if its new
+            }
+            return prevState;
+          });
+        }
       }
-      //Only handle the devices with specific name for GLymphometer (GM5) and everything comes after it such as GM5-1, GM5-2, etc
-      if (
-        device?.name?.startsWith("GM5") ||
-        device?.localName?.startsWith("GM5")
-      ) {
-        setAllDevices((prevState: Device[]) => {
-          if (!isDeviceDuplicated(prevState, device)) {
-            return [...prevState, device];
-            //Add the device if its new
-          }
-          return prevState;
-        });
-      }
-    });
+    );
   };
   ////
 
@@ -167,11 +199,16 @@ function useBLE() {
           base64Command
         );
         console.log(`Deivce ${status}ed`);
-      } catch (error) {
-        console.log(`Data streaming failed to ${status}`, error);
+      } catch (error: unknown) {
+        handleError(error, `Error ${status}ing data streaming`);
       }
     } else {
-      console.log("Device not connected");
+      Toast.show({
+        type: "error",
+        text1: "No Device is Connected.",
+        text2: "No Device is Connected.",
+        position: "bottom",
+      });
     }
   };
 
@@ -182,7 +219,6 @@ function useBLE() {
   ) => {
     if (device) {
       console.log("data streaming started");
-
       //set the mut to 512 to contain the 509 bytes data from GM5  (the default mut size is 23 bytes, showing only 20bytes of the data)
       device
         .requestMTU(512)
@@ -204,7 +240,7 @@ function useBLE() {
     (setReceivedData?: (data: string) => void) =>
     (error: BleError | null, characteristic: Characteristic | null) => {
       if (error) {
-        console.log("Error in receving the data", error);
+        handleError(error, "Error receiving data");
         return;
       }
       if (characteristic && characteristic.value) {
