@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-
 import DeviceModal from "../../components/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
+import ToastMessages from "@/components/ToastMessages";
 export default function index() {
   const {
     allDevices,
@@ -120,6 +120,7 @@ export default function index() {
         connectToPeripheral={connectToDevice}
         devices={allDevices}
       />
+      <ToastMessages />
     </SafeAreaView>
   );
 }
