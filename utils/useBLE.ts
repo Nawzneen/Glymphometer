@@ -1,11 +1,9 @@
 // useBLE.native.ts
-////////////////////////////////////////////////
 import * as FileSystem from "expo-file-system";
 import { handleError } from "./handleError";
 import Toast from "react-native-toast-message";
-import ToastMessages from "@/components/ToastMessages";
 import { requestPermissions } from "./requestPermissions";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { discoverBLEServicesCharactristics } from "./bleCharacteristics";
 import base64 from "react-native-base64";
 import {
@@ -24,9 +22,21 @@ const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Rec
 
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
+  const [packet, setPacket] = useState<string>(""); //Track the received data packet
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
-  const [startDataStreaming, setStartDataStreaming] = useState<boolean>(false); //Track data streaming status
+  const [isDataStreaming, setIsDataStreaming] = useState<boolean>(false); //Track data streaming status
   // Initialization and BLE State Listener
+  const dataSubscription = useRef<Subscription | null>(null); //Initialize data subscription ref
+
+  useEffect(() => {
+    return () => {
+      // Clean up dataSubscription
+      if (dataSubscription.current) {
+        dataSubscription.current.remove();
+        dataSubscription.current = null;
+      }
+    };
+  }, []);
 
   //If devices is disconnected or turned off, set the connected device to null
   useEffect(() => {
@@ -190,33 +200,67 @@ function useBLE() {
   // S starts the data streaming, P pauses the data streaming
   const toggleDataStreaming = async (device: Device, command: string) => {
     const status = command === "S" ? "Start" : "Pause";
-    if (device) {
-      //Encode the command string to base64
-      const base64Command = base64.encode(command);
-      try {
-        await device.writeCharacteristicWithResponseForService(
-          DATA_SERVICE_UUID,
-          RX_CHARACTERISTIC_UUID,
-          base64Command
-        );
-        console.log(`Deivce ${status}ed`);
-      } catch (error: unknown) {
-        handleError(error, `Error ${status}ing data streaming`);
-      }
-    } else {
+    if (!device) {
       Toast.show({
         type: "error",
         text1: "No Device is Connected.",
         text2: "No Device is Connected.",
+        position: "top", // Consistent position
+      });
+      return;
+    }
+
+    // Prevent duplicate actions/toggles
+    if (
+      (command === "S" && isDataStreaming) ||
+      (command === "P" && !isDataStreaming)
+    ) {
+      Toast.show({
+        type: "error",
+        text1: `Data Streaming Already ${
+          command === "S" ? "Started" : "Paused"
+        }`,
+        text2: `Cannot ${
+          command === "S" ? "start" : "pause"
+        } again without toggling.`,
         position: "bottom",
       });
+      return;
+    }
+    //Encode the command string to base64
+    const base64Command = base64.encode(command);
+    try {
+      await device.writeCharacteristicWithResponseForService(
+        DATA_SERVICE_UUID,
+        RX_CHARACTERISTIC_UUID,
+        base64Command
+      );
+      if (command === "S") {
+        dataStreaming(device); // Start data streaming
+      } else if (command === "P") {
+        // Stop data streaming and remove listener
+        if (dataSubscription.current) {
+          dataSubscription.current.remove();
+          dataSubscription.current = null;
+        }
+      }
+      setIsDataStreaming(command === "S"); //set true if command is S
+      Toast.show({
+        type: "success",
+        text1: `Data Streaming ${status}ed`,
+        text2: `Data streaming has been ${status.toLowerCase()}ed.`,
+        position: "top",
+      });
+    } catch (error: unknown) {
+      handleError(error, `Error ${status}ing data streaming`);
+      // setIsDataStreaming(command === "P");
     }
   };
 
   // FUNCTION FOR DATA STREAMING
   const dataStreaming = (
-    device: Device,
-    setReceivedData?: (data: string) => void
+    device: Device
+    // setReceivedData?: (data: string) => void
   ) => {
     if (device) {
       console.log("data streaming started");
@@ -224,10 +268,16 @@ function useBLE() {
       device
         .requestMTU(512)
         .then((mtu) => {
-          device.monitorCharacteristicForService(
+          // Before setting up a new listener, remove any existing one
+          if (dataSubscription.current) {
+            dataSubscription.current.remove();
+            dataSubscription.current = null;
+          }
+          // Set up the listener and store the subscription
+          dataSubscription.current = device.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
             TX_CHARACTERISTIC_UUID,
-            onDataUpdate(setReceivedData) //callback function to handle the data
+            onDataUpdate //callback function to handle the data
           );
         })
         .catch((error) => {
@@ -238,7 +288,7 @@ function useBLE() {
 
   //CALL BACK FUNCTION TO HANDLE THE RECEIVED DATA
   const onDataUpdate =
-    (setReceivedData?: (data: string) => void) =>
+    // (setReceivedData?: (data: string) => void) =>
     (error: BleError | null, characteristic: Characteristic | null) => {
       if (error) {
         handleError(error, "Error receiving data");
@@ -255,7 +305,7 @@ function useBLE() {
         for (let i = 0; i < decodedData.length; i++) {
           decimalValues.push(decodedData.charCodeAt(i));
         }
-        setReceivedData?.(decimalValues.join(","));
+        setPacket?.(decimalValues.join(","));
         console.log("Data Received", decimalValues.join(","));
       } else {
         console.error("Characteristic value is null or undefined.");
@@ -272,6 +322,9 @@ function useBLE() {
     scanForPeripherals, // Function to start scanning for devices
     toggleDataStreaming, // Function to start or pause data streaming for GM5
     dataStreaming, // Function to start data streaming for GM5
+    packet, // Received data packet
+    isDataStreaming, // Data streaming status
+    setIsDataStreaming, // Set data streaming status
   };
 }
 

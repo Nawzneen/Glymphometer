@@ -16,12 +16,12 @@ export default function index() {
     toggleDataStreaming,
     requestPermissions,
     scanForPeripherals,
-    dataStreaming,
+    isDataStreaming,
+    packet,
   } = useBLE();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const [receivedData, setReceivedData] = useState<string>("");
-  const [isDataStreaming, setIsDataStreaming] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
   React.useEffect(() => {
     if (connectedDevice) {
       setIsConnected(true);
@@ -45,18 +45,13 @@ export default function index() {
     scanForDevices();
     setIsModalVisible(true);
   };
-  const handleDataStreamingToggle = (value: boolean) => {
-    setIsDataStreaming(value);
+  const handleDataStreamingToggle = async (value: boolean) => {
+    if (isLoading) return; //prevent multiple roggles
+    setIsLoading(true);
     if (connectedDevice) {
-      if (value) {
-        console.log("start data streaming");
-        toggleDataStreaming(connectedDevice, "S");
-        dataStreaming(connectedDevice, setReceivedData);
-      } else {
-        console.log("stop data streaming");
-        toggleDataStreaming(connectedDevice, "P");
-      }
+      await toggleDataStreaming(connectedDevice, value ? "S" : "P");
     }
+    setIsLoading(false);
   };
 
   return (
@@ -96,11 +91,12 @@ export default function index() {
             <SignalQuality
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
+              isLoading={isLoading}
             />
 
-            {receivedData && (
+            {packet && (
               <Text className="px-1 text-secondary-text-color">
-                GMeter Data streaming : {receivedData}
+                GMeter Data streaming : {packet}
               </Text>
             )}
           </>
@@ -110,9 +106,6 @@ export default function index() {
           </Text>
         )}
       </View>
-      {/* <TouchableOpacity onPress={openModal} style={styles.ctaCustomButton}>
-        <Text style={styles.ctaCustomButtonText}>Connect</Text>
-      </TouchableOpacity> */}
 
       <DeviceModal
         closeModal={hideModal}

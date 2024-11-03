@@ -5,10 +5,12 @@ import { Switch } from "react-native";
 interface SignalQualityProps {
   isDataStreaming: boolean;
   onToggleDataStreaming: (value: boolean) => void;
+  isLoading: boolean;
 }
 const SignalQuality: React.FC<SignalQualityProps> = ({
   isDataStreaming,
   onToggleDataStreaming,
+  isLoading,
 }) => {
   return (
     <>
@@ -22,6 +24,7 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
             thumbColor={isDataStreaming ? "#f5dd4b" : "#f4f3f4"}
             onValueChange={onToggleDataStreaming}
             value={isDataStreaming}
+            disabled={isLoading} // Disable switch while toggling
           />
         </View>
 
