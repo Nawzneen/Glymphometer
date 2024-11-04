@@ -1,4 +1,3 @@
-// errorHandler.ts
 import { BleError } from "react-native-ble-plx";
 import Toast from "react-native-toast-message";
 
@@ -10,7 +9,7 @@ export const handleError = (
     Toast.show({
       type: "error",
       text1: `${context} - BLE Error`,
-      text2: `Code: ${error.errorCode}, Message: ${error.message}`,
+      text2: `${error.errorCode}: ${error.message}`,
       position: "bottom",
     });
   } else if (error instanceof Error) {
