@@ -11,8 +11,8 @@ export default function index() {
   const {
     allDevices,
     connectedDevice,
-    connectToDevice,
-    disconnectDevice,
+    handleConnectToDevice,
+    handleDisconnectDevice,
     toggleDataStreaming,
     requestPermissions,
     scanForPeripherals,
@@ -81,7 +81,7 @@ export default function index() {
                 />
               </TouchableOpacity> */}
               <TouchableOpacity
-                onPress={disconnectDevice}
+                onPress={handleDisconnectDevice}
                 className="ml-2 bg-gray-200 p-2 rounded-full"
               >
                 <AntDesign name="disconnect" size={24} color="black" />
@@ -110,7 +110,7 @@ export default function index() {
       <DeviceModal
         closeModal={hideModal}
         visible={isModalVisible}
-        connectToPeripheral={connectToDevice}
+        connectToPeripheral={handleConnectToDevice}
         devices={allDevices}
       />
       <ToastMessages />

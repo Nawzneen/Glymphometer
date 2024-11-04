@@ -4,7 +4,7 @@ import { handleError } from "./handleError";
 import Toast from "react-native-toast-message";
 import { requestPermissions } from "./requestPermissions";
 import { useRef, useEffect, useState } from "react";
-import { discoverBLEServicesCharactristics } from "./bleCharacteristics";
+import { connectToDevice, disconnectDevice } from "./bleConnection";
 import base64 from "react-native-base64";
 import {
   BleError,
@@ -109,63 +109,13 @@ function useBLE() {
     fetchConnectedDevices();
   }, []);
 
-  //FUNCTION TO CONNECT TO THE BLE DEVICE
-  const connectToDevice = async (device: Device) => {
-    if (connectedDevice) {
-      await disconnectDevice(); // Disconnect the currently connected device when requesting a new connection
-    }
-    try {
-      // Connect to the device using its ID by a methode provided by blemanager
-      const deviceConnection = await bleManager.connectToDevice(device.id);
-      Toast.show({
-        type: "success",
-        text1: "Device Connected successfully",
-        text2: `Device Connected successfully:  ${deviceConnection.name}`,
-        position: "top",
-      });
-
-      // Discover all services and characteristics of the device
-      await discoverBLEServicesCharactristics(deviceConnection);
-
-      // set the connected device state
-      setConnectedDevice(deviceConnection);
-      // Stop scanning for devices once connected
-      bleManager.stopDeviceScan();
-    } catch (error: unknown) {
-      handleError(error, "Error connecting to device");
-    }
+  // Function to connect to a BLE device
+  const handleConnectToDevice = async (device: Device) => {
+    await connectToDevice(connectedDevice, device, setConnectedDevice);
   };
-
-  //FUNCTION TO DISCONNECT TO THE BLE DEVICE
-  const disconnectDevice = async () => {
-    if (!connectedDevice) {
-      Toast.show({
-        type: "info",
-        text1: "No Device Connected",
-        text2: "There is no device currently connected.",
-        position: "top",
-      });
-      return;
-    }
-    try {
-      await bleManager.cancelDeviceConnection(connectedDevice.id); // Disconnect the device
-      setConnectedDevice(null); // Reset the connected device
-      Toast.show({
-        type: "success",
-        text1: "Disconnected",
-        text2: `Disconnected from ${
-          connectedDevice.name || connectedDevice.id
-        }`,
-        position: "top",
-      });
-    } catch (error: unknown) {
-      handleError(error, "Error disconnecting from device");
-    }
-  };
-
-  //HELPER FUNCTION TO CHECK IF A DEVICE HAS ALREADY BEEN DISCORVERED
-  const isDeviceDuplicated = (devices: Device[], newDevice: Device) => {
-    return devices.findIndex((device) => newDevice.id === device.id) > -1;
+  // Function to disconnect from a BLE device
+  const handleDisconnectDevice = async () => {
+    await disconnectDevice(connectedDevice, setConnectedDevice);
   };
 
   //FUNCTION TO START SCANNING FOR PERIPHERALS
@@ -184,9 +134,12 @@ function useBLE() {
           device?.localName?.startsWith("GM5")
         ) {
           setAllDevices((prevState: Device[]) => {
-            if (!isDeviceDuplicated(prevState, device)) {
-              return [...prevState, device];
+            const deviceIndex = prevState.findIndex(
+              (prevDevice) => prevDevice.id === device.id
+            );
+            if (deviceIndex === -1) {
               //Add the device if its new
+              return [...prevState, device];
             }
             return prevState;
           });
@@ -315,10 +268,10 @@ function useBLE() {
 
   return {
     requestPermissions, // Function to request necessary permissions
-    connectToDevice, // Function to connect to GM5 device
+    handleConnectToDevice, // Function to connect to GM5 device
+    handleDisconnectDevice, // Function to disconnect from the device
     allDevices, // List of all discovered devices
     connectedDevice, // Currently connected device
-    disconnectDevice, // Function to disconnect from the device
     scanForPeripherals, // Function to start scanning for devices
     toggleDataStreaming, // Function to start or pause data streaming for GM5
     dataStreaming, // Function to start data streaming for GM5
