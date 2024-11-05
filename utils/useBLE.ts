@@ -1,5 +1,6 @@
 // useBLE.native.ts
 import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { handleError } from "./handleError";
 import Toast from "react-native-toast-message";
 import { requestPermissions } from "./requestPermissions";
@@ -19,7 +20,8 @@ import { Alert } from "react-native";
 const DATA_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Service UUID for handling data
 const RX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //To Send Data / write
 const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Recieve UUID / notify
-
+let dataBuffer: string[] = []; // Buffer to accumulate all the streaming data
+console.log("I ran");
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   const [packet, setPacket] = useState<string>(""); //Track the received data packet
@@ -196,6 +198,12 @@ function useBLE() {
           dataSubscription.current.remove();
           dataSubscription.current = null;
         }
+        // Save data to file after stopping the streaming
+        await saveDataToFile();
+        console.log("data saved");
+        // Clear the data buffer after saving
+        dataBuffer = [];
+        console.log("buffer emptied");
       }
       setIsDataStreaming(command === "S"); //set true if command is S
       Toast.show({
@@ -251,15 +259,37 @@ function useBLE() {
         //characteristic.value is a base64 encoded string
         const encodedData = characteristic.value;
         // Decode the Base64 string to a byte array
-        // const decodedData = atob(encodedData);
         const decodedData = base64.decode(encodedData);
-        // Convert the byte array to a decimal values
-        const decimalValues = [];
+        // Convert the byte array to hexadecimal values
+
+        // Append the decoded data to the buffer
+        // dataBuffer.push(decodedData);
+        // console.log("dataBuffer", dataBuffer);
+
+        const hexValues = [];
         for (let i = 0; i < decodedData.length; i++) {
-          decimalValues.push(decodedData.charCodeAt(i));
+          // Convert each character code to hexadecimal and pad it to ensure it's always two digits (e.g., '0a' instead of 'a')
+          let hex = decodedData.charCodeAt(i).toString(16);
+          if (hex.length < 2) {
+            hex = "0" + hex; // Pad single-digit hex values with a leading zero
+          }
+          hexValues.push(hex);
         }
-        setPacket?.(decimalValues.join(","));
-        console.log("Data Received", decimalValues.join(","));
+        dataBuffer.push(hexValues.join(" "));
+        console.log("hexValues", hexValues.join(" "));
+
+        const byteArray = [];
+        for (let i = 0; i < decodedData.length; i++) {
+          byteArray.push(decodedData.charCodeAt(i));
+        }
+
+        const extracted24Bytes = byteArray.slice(478, 509 - 7); // The 24 bytes we want (bytes from 478 to 502 inclusive)
+        setPacket?.(hexValues.join(" "));
+        const extracted24BytesHex = extracted24Bytes
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join(" ");
+        // console.log("Extracted 24 Bytes (Hex):", extracted24BytesHex);
+        // console.log("Data Received", hexValues.join(","));
       } else {
         console.error("Characteristic value is null or undefined.");
       }
@@ -282,3 +312,47 @@ function useBLE() {
 }
 
 export default useBLE;
+// FUNCTION TO SAVE DATA TO A FILE
+const saveDataToFile = async () => {
+  try {
+    // Join all accumulated data from the buffer
+    const dataToSave = dataBuffer.join("");
+    // console.log("dataToSave", dataToSave);
+    // Define the path where you want to save the file
+    const fileUri = FileSystem.documentDirectory + "streamingData.txt";
+
+    // Write the accumulated data to the file
+    await FileSystem.writeAsStringAsync(fileUri, dataToSave);
+
+    // Show a success message
+    Toast.show({
+      type: "success",
+      text1: "Data Saved Successfully",
+      text2: `File saved at: ${fileUri}`,
+      position: "top",
+    });
+    //Share the file after saving
+    await shareFile(fileUri);
+  } catch (error) {
+    handleError(error, "Error saving data to file");
+  }
+};
+// FUNCTION TO SHARE DATA FILE
+const shareFile = async (fileUri: string) => {
+  try {
+    const isAvailable = await Sharing.isAvailableAsync();
+    if (isAvailable) {
+      await Sharing.shareAsync(fileUri);
+      console.log("File shared successfully");
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Sharing Not Available",
+        text2: "Sharing is not available on this device.",
+        position: "top",
+      });
+    }
+  } catch (error) {
+    handleError(error, "Error sharing file");
+  }
+};
