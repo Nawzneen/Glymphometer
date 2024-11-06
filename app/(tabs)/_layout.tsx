@@ -5,7 +5,8 @@ import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Header from "@/components/Header"; // Import your custom Header component
-
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -27,10 +28,11 @@ export default function TabLayout() {
           options={{
             title: "Connect",
             tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "code-slash" : "code-slash-outline"}
-                color={color}
-              />
+              // <TabBarIcon
+              //   name={focused ? "code-slash" : "code-slash-outline"}
+              //   color={color}
+              // />
+              <FontAwesome6 name="connectdevelop" size={24} color="black" />
             ),
           }}
         />
@@ -43,6 +45,19 @@ export default function TabLayout() {
                 name={focused ? "code-slash" : "code-slash-outline"}
                 color={color}
               />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="savedFiles"
+          options={{
+            title: "Saved Files",
+            tabBarIcon: ({ color, focused }) => (
+              <AntDesign name="filetext1" size={24} color={color} />
+              // <TabBarIcon
+              //   name={focused ? "code-slash" : "code-slash-outline"}
+              //   color={color}
+              // />
             ),
           }}
         />
