@@ -7,6 +7,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
+import Record from "@/components/Record";
 export default function index() {
   const {
     allDevices,
@@ -20,6 +21,7 @@ export default function index() {
     packet,
   } = useBLE();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
   React.useEffect(() => {
@@ -45,6 +47,7 @@ export default function index() {
     scanForDevices();
     setIsModalVisible(true);
   };
+
   const handleDataStreamingToggle = async (value: boolean) => {
     if (isLoading) return; //prevent multiple roggles
     setIsLoading(true);
@@ -59,9 +62,6 @@ export default function index() {
       <View className="flex flex-row gap-x-2 items-center justify-center  ">
         <View>
           <CustomButton title="Connect to GM5" onPress={openModal} />
-        </View>
-        <View>
-          <CustomButton title="Open Saved Data" onPress={scanForDevices} />
         </View>
       </View>
       <View className="">
@@ -94,11 +94,12 @@ export default function index() {
               isLoading={isLoading}
             />
 
-            {packet && (
+            {/* {packet && (
               <Text className="px-1 text-secondary-text-color">
                 GMeter Data streaming : {packet}
               </Text>
-            )}
+            )} */}
+            <Record isDataStreaming={isDataStreaming} />
           </>
         ) : (
           <Text className="mt-16 text-primary-text-color text-center font-bold text-2xl px-4">

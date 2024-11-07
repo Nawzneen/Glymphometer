@@ -13,15 +13,18 @@ import {
   Characteristic,
   Subscription,
 } from "react-native-ble-plx";
+import { addToDataBuffer } from "./dataBuffer";
 import bleManager from "./bleManager";
 import { Alert } from "react-native";
-
+import { Buffer } from "buffer";
+if (typeof global.Buffer === "undefined") {
+  global.Buffer = Buffer;
+}
 // Device Characteristitcs UUIDs specific to GM5
 const DATA_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Service UUID for handling data
 const RX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //To Send Data / write
 const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Recieve UUID / notify
-let dataBuffer: string[] = []; // Buffer to accumulate all the streaming data
-console.log("I ran");
+
 function useBLE() {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   const [packet, setPacket] = useState<string>(""); //Track the received data packet
@@ -199,11 +202,9 @@ function useBLE() {
           dataSubscription.current = null;
         }
         // Save data to file after stopping the streaming
-        await saveDataToFile();
-        console.log("data saved");
+        // await saveDataToFile();
         // Clear the data buffer after saving
-        dataBuffer = [];
-        console.log("buffer emptied");
+        // dataBuffer = [];
       }
       setIsDataStreaming(command === "S"); //set true if command is S
       Toast.show({
@@ -275,21 +276,22 @@ function useBLE() {
           }
           hexValues.push(hex);
         }
-        dataBuffer.push(hexValues.join(" "));
-        console.log("hexValues", hexValues.join(" "));
+        // dataBuffer.push(hexValues.join(" "));
+        // console.log("hexValues", hexValues.join(" "));
 
         const byteArray = [];
         for (let i = 0; i < decodedData.length; i++) {
           byteArray.push(decodedData.charCodeAt(i));
         }
-
-        const extracted24Bytes = byteArray.slice(478, 509 - 7); // The 24 bytes we want (bytes from 478 to 502 inclusive)
-        setPacket?.(hexValues.join(" "));
-        const extracted24BytesHex = extracted24Bytes
-          .map((byte) => byte.toString(16).padStart(2, "0"))
-          .join(" ");
+        addToDataBuffer(byteArray); // Accumulate binary data
+        // dataBuffer.push(...byteArray); // Accumulate binary data
+        // const extracted24Bytes = byteArray.slice(478, 509 - 7); // The 24 bytes we want (bytes from 478 to 502 inclusive)
+        // setPacket?.(hexValues.join(" "));
+        // const extracted24BytesHex = extracted24Bytes
+        //   .map((byte) => byte.toString(16).padStart(2, "0"))
+        //   .join(" ");
         // console.log("Extracted 24 Bytes (Hex):", extracted24BytesHex);
-        // console.log("Data Received", hexValues.join(","));
+        console.log("Binary Data Received");
       } else {
         console.error("Characteristic value is null or undefined.");
       }
@@ -312,47 +314,3 @@ function useBLE() {
 }
 
 export default useBLE;
-// FUNCTION TO SAVE DATA TO A FILE
-const saveDataToFile = async () => {
-  try {
-    // Join all accumulated data from the buffer
-    const dataToSave = dataBuffer.join("");
-    // console.log("dataToSave", dataToSave);
-    // Define the path where you want to save the file
-    const fileUri = FileSystem.documentDirectory + "streamingData.txt";
-
-    // Write the accumulated data to the file
-    await FileSystem.writeAsStringAsync(fileUri, dataToSave);
-
-    // Show a success message
-    Toast.show({
-      type: "success",
-      text1: "Data Saved Successfully",
-      text2: `File saved at: ${fileUri}`,
-      position: "top",
-    });
-    //Share the file after saving
-    await shareFile(fileUri);
-  } catch (error) {
-    handleError(error, "Error saving data to file");
-  }
-};
-// FUNCTION TO SHARE DATA FILE
-const shareFile = async (fileUri: string) => {
-  try {
-    const isAvailable = await Sharing.isAvailableAsync();
-    if (isAvailable) {
-      await Sharing.shareAsync(fileUri);
-      console.log("File shared successfully");
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Sharing Not Available",
-        text2: "Sharing is not available on this device.",
-        position: "top",
-      });
-    }
-  } catch (error) {
-    handleError(error, "Error sharing file");
-  }
-};
