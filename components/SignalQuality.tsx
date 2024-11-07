@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text } from "react-native";
 import SensorColumn from "@/components/tabs/SensorColumn";
 import { Switch } from "react-native";
+import PulsingRings from "./PulsingRings";
 interface SignalQualityProps {
   isDataStreaming: boolean;
   onToggleDataStreaming: (value: boolean) => void;
@@ -27,14 +28,30 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
             disabled={isLoading} // Disable switch while toggling
           />
         </View>
+        {isDataStreaming ? (
+          <View className="mt-4 flex flex-row justify-center items-center">
+            <Text className="text-base text-success-color">
+              Data is being transfered...
+            </Text>
+            <View className="ml-4">
+              <PulsingRings />
+            </View>
+          </View>
+        ) : (
+          <View className="mt-4 flex flex-row justify-center items-center">
+            <Text className="text-base">
+              No Data received from Glymphometer.
+            </Text>
+          </View>
+        )}
 
-        <View className="rounded-lg flex-row justify-center w-[95%] ">
+        {/* <View className="rounded-lg flex-row justify-center w-[95%] ">
           <SensorColumn title="NIRS1" isDataStreaming={isDataStreaming} />
           <SensorColumn title="NIRS2" isDataStreaming={isDataStreaming} />
           <SensorColumn title="NIRS3" isDataStreaming={isDataStreaming} />
           <SensorColumn title="EEG" isDataStreaming={isDataStreaming} />
           <SensorColumn title="EKG" isDataStreaming={isDataStreaming} />
-        </View>
+        </View> */}
       </View>
     </>
   );
