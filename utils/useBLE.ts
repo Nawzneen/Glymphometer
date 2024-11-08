@@ -7,11 +7,14 @@ import { requestPermissions } from "./requestPermissions";
 import { useRef, useEffect, useState } from "react";
 import { connectToDevice, disconnectDevice } from "./bleConnection";
 import base64 from "react-native-base64";
+import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
+
 import {
   BleError,
   Device,
   Characteristic,
   Subscription,
+  BleErrorCode,
 } from "react-native-ble-plx";
 import { addToDataBuffer } from "./dataBuffer";
 import bleManager from "./bleManager";
@@ -25,18 +28,20 @@ const DATA_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Service UUI
 const RX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //To Send Data / write
 const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Recieve UUID / notify
 
-function useBLE() {
+function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   const [packet, setPacket] = useState<string>(""); //Track the received data packet
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
   const [isDataStreaming, setIsDataStreaming] = useState<boolean>(false); //Track data streaming status
   // Initialization and BLE State Listener
   const dataSubscription = useRef<Subscription | null>(null); //Initialize data subscription ref
+  // const [packetNumber, setPacketNumber] = useState<number>(0); //Track the packet number
 
   useEffect(() => {
     return () => {
       // Clean up dataSubscription
       if (dataSubscription.current) {
+        clearDataBuffer(); // Clear the data buffer
         dataSubscription.current.remove();
         dataSubscription.current = null;
       }
@@ -50,7 +55,17 @@ function useBLE() {
       disconnectSubscription = connectedDevice.onDisconnected(
         (error, device) => {
           // console.log("Device disconnected", device.id);
+          if (dataSubscription.current) {
+            console.log(
+              "removing data subscription",
+              typeof dataSubscription.current
+            );
+            dataSubscription.current.remove();
+            dataSubscription.current = null;
+          }
+          clearDataBuffer(); // Clear the data buffer
           setConnectedDevice(null);
+
           Toast.show({
             type: "success",
             text1: "Disconnected",
@@ -133,6 +148,7 @@ function useBLE() {
           handleError(error, "Scanning for Peripherals");
           return;
         }
+
         //Only handle the devices with specific name for GLymphometer (GM5) and everything comes after it such as GM5-1, GM5-2, etc
         if (
           device?.name?.startsWith("GM5") ||
@@ -201,10 +217,6 @@ function useBLE() {
           dataSubscription.current.remove();
           dataSubscription.current = null;
         }
-        // Save data to file after stopping the streaming
-        // await saveDataToFile();
-        // Clear the data buffer after saving
-        // dataBuffer = [];
       }
       setIsDataStreaming(command === "S"); //set true if command is S
       Toast.show({
@@ -235,6 +247,7 @@ function useBLE() {
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
+          console.log("setting up data subscription");
           // Set up the listener and store the subscription
           dataSubscription.current = device.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
@@ -252,48 +265,50 @@ function useBLE() {
   const onDataUpdate =
     // (setReceivedData?: (data: string) => void) =>
     (error: BleError | null, characteristic: Characteristic | null) => {
-      if (error) {
-        handleError(error, "Error receiving data");
-        return;
-      }
-      if (characteristic && characteristic.value) {
-        //characteristic.value is a base64 encoded string
-        const encodedData = characteristic.value;
-        // Decode the Base64 string to a byte array
-        const decodedData = base64.decode(encodedData);
-        // Convert the byte array to hexadecimal values
-
-        // Append the decoded data to the buffer
-        // dataBuffer.push(decodedData);
-        // console.log("dataBuffer", dataBuffer);
-
-        const hexValues = [];
-        for (let i = 0; i < decodedData.length; i++) {
-          // Convert each character code to hexadecimal and pad it to ensure it's always two digits (e.g., '0a' instead of 'a')
-          let hex = decodedData.charCodeAt(i).toString(16);
-          if (hex.length < 2) {
-            hex = "0" + hex; // Pad single-digit hex values with a leading zero
+      // console.log("on Data update is supposed to run");
+      try {
+        if (error) {
+          console.log("Error onDataUpdate", error);
+          // If the error indicates the device is disconnected, remove the subscription
+          console.log("Error Code:", error.errorCode);
+          console.log(BleErrorCode.DeviceDisconnected);
+          if (error.errorCode === BleErrorCode.DeviceDisconnected) {
+            console.log("i am running");
+            if (dataSubscription.current) {
+              dataSubscription.current.remove();
+              dataSubscription.current = null;
+              console.log("Data subscription removed in onDataUpdate");
+            }
+            setIsDataStreaming(false);
           }
-          hexValues.push(hex);
+          return;
         }
-        // dataBuffer.push(hexValues.join(" "));
-        // console.log("hexValues", hexValues.join(" "));
 
-        const byteArray = [];
-        for (let i = 0; i < decodedData.length; i++) {
-          byteArray.push(decodedData.charCodeAt(i));
+        if (characteristic && characteristic.value) {
+          //characteristic.value is a base64 encoded string
+          const encodedData = characteristic.value;
+          // Decode the Base64 string to a byte array
+          const decodedData = base64.decode(encodedData);
+
+          const byteArray = [];
+          for (let i = 0; i < decodedData.length; i++) {
+            byteArray.push(decodedData.charCodeAt(i));
+          }
+          // this is decimal values of each paceket [83,83,...,69,69]
+          // console.log("byteArray", byteArray);
+          console.log("isRecordingRef", isRecordingRef.current);
+          if (isRecordingRef.current) {
+            addToDataBuffer(byteArray); // Accumulate binary data
+            console.log("data is being recorded");
+          }
+
+          // console.log("data is streaming");
+        } else {
+          console.error("Characteristic value is null or undefined.");
         }
-        addToDataBuffer(byteArray); // Accumulate binary data
-        // dataBuffer.push(...byteArray); // Accumulate binary data
-        // const extracted24Bytes = byteArray.slice(478, 509 - 7); // The 24 bytes we want (bytes from 478 to 502 inclusive)
-        // setPacket?.(hexValues.join(" "));
-        // const extracted24BytesHex = extracted24Bytes
-        //   .map((byte) => byte.toString(16).padStart(2, "0"))
-        //   .join(" ");
-        // console.log("Extracted 24 Bytes (Hex):", extracted24BytesHex);
-        console.log("Binary Data Received");
-      } else {
-        console.error("Characteristic value is null or undefined.");
+      } catch (error: unknown) {
+        console.log("Error receiving data", error);
+        handleError(error, "Error receiving data");
       }
     };
   ////
@@ -310,6 +325,7 @@ function useBLE() {
     packet, // Received data packet
     isDataStreaming, // Data streaming status
     setIsDataStreaming, // Set data streaming status
+    // packetNumber, // Packet number
   };
 }
 
