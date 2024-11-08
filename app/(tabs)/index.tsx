@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import DeviceModal from "../../components/DeviceConnectionModal";
@@ -9,6 +9,7 @@ import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
 export default function index() {
+  const isRecordingRef = useRef(false);
   const {
     allDevices,
     connectedDevice,
@@ -18,8 +19,8 @@ export default function index() {
     requestPermissions,
     scanForPeripherals,
     isDataStreaming,
-    packet,
-  } = useBLE();
+    // packetNumber,
+  } = useBLE(isRecordingRef);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -34,6 +35,7 @@ export default function index() {
 
   const scanForDevices = async () => {
     const isPermissionsEnabled = await requestPermissions();
+    console.log("isPermissionsEnabled", isPermissionsEnabled);
     if (isPermissionsEnabled) {
       scanForPeripherals();
     }
@@ -92,6 +94,7 @@ export default function index() {
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
               isLoading={isLoading}
+              // packetNumber={packetNumber}
             />
 
             {/* {packet && (
@@ -99,7 +102,10 @@ export default function index() {
                 GMeter Data streaming : {packet}
               </Text>
             )} */}
-            <Record isDataStreaming={isDataStreaming} />
+            <Record
+              isDataStreaming={isDataStreaming}
+              isRecordingRef={isRecordingRef}
+            />
           </>
         ) : (
           <Text className="mt-16 text-primary-text-color text-center font-bold text-2xl px-4">

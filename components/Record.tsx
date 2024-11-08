@@ -1,17 +1,20 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
 import { handleError } from "@/utils/handleError";
 interface RecordProps {
   isDataStreaming: boolean;
+  isRecordingRef: React.MutableRefObject<boolean>;
 }
-const Record: React.FC<RecordProps> = ({ isDataStreaming }) => {
+const Record: React.FC<RecordProps> = ({ isDataStreaming, isRecordingRef }) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
+  // Update the ref whenever isRecording changes
+
   useEffect(() => {
     setError("");
     setIsRecording(false);
@@ -40,6 +43,7 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming }) => {
     if (isDataStreaming) {
       setIsPaused(false);
       setIsRecording(true);
+      isRecordingRef.current = true;
       setDuration(0); //Reset the duration when recording starts
     } else {
       setError("Enable data streaming first to start recording");
@@ -49,6 +53,7 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming }) => {
     if (isDataStreaming) {
       setIsRecording(false);
       setIsPaused(true);
+      isRecordingRef.current = false;
     }
   }
   function discardData() {
@@ -111,7 +116,10 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming }) => {
       <View className="mt-2">
         <Text className="">
           Recording Duration:{" "}
-          <Text className="text-success-color"> {duration} Sec</Text>
+          <Text className="text-success-color">
+            {" "}
+            {formatDuration(duration)}
+          </Text>
         </Text>
       </View>
       <Text className="text-red-500 mt-2">{error}</Text>
@@ -120,3 +128,18 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming }) => {
 };
 
 export default Record;
+function formatDuration(seconds: number) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  let result = "";
+  if (hrs > 0) {
+    result += `${hrs}h`;
+  }
+  if (mins > 0) {
+    result += `${mins}m`;
+  }
+  result += `${secs}s`;
+  return result.trim();
+}
