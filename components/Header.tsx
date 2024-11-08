@@ -10,10 +10,10 @@ const Header: React.FC<HeaderProps> = ({ title = "My App", onButtonPress }) => (
     <Text className="text-center font-bold text-xl text-light-text-color">
       {title}
     </Text>
-    <View className="flex flex-row items-center justify-center gap-x-2 text-base">
+    {/* <View className="flex flex-row items-center justify-center gap-x-2 text-base">
       <View className="rounded-full bg-success-color w-[25px] h-[25px]" />
       <Text className="text-center font-bold text-light-text-color">30%</Text>
-    </View>
+    </View> */}
 
     {/* {onButtonPress && (
       <TouchableOpacity onPress={onButtonPress}>

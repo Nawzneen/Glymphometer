@@ -7,11 +7,13 @@ interface SignalQualityProps {
   isDataStreaming: boolean;
   onToggleDataStreaming: (value: boolean) => void;
   isLoading: boolean;
+  packetNumber?: number;
 }
 const SignalQuality: React.FC<SignalQualityProps> = ({
   isDataStreaming,
   onToggleDataStreaming,
   isLoading,
+  // packetNumber,
 }) => {
   return (
     <>
@@ -29,13 +31,16 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
           />
         </View>
         {isDataStreaming ? (
-          <View className="mt-4 flex flex-row justify-center items-center">
-            <Text className="text-base text-success-color">
-              Data is being transfered...
-            </Text>
-            <View className="ml-4">
-              <PulsingRings />
+          <View className="mt-4 flex flex-row justify-between items-center">
+            <View className="flex flex-row justify-center items-center">
+              <Text className="text-base text-success-color">
+                Data is being transfered...
+              </Text>
+              <View className="ml-4">
+                <PulsingRings />
+              </View>
             </View>
+            <View>{/* <Text>{packetNumber}</Text> */}</View>
           </View>
         ) : (
           <View className="mt-4 flex flex-row justify-center items-center">
