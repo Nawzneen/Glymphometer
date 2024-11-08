@@ -32,28 +32,36 @@ export default function TabLayout() {
               //   name={focused ? "code-slash" : "code-slash-outline"}
               //   color={color}
               // />
-              <FontAwesome6 name="connectdevelop" size={24} color="black" />
+              <FontAwesome6
+                name="connectdevelop"
+                size={24}
+                color={focused ? "orange" : "black"}
+              />
             ),
           }}
         />
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="results"
           options={{
             title: "Results",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? "code-slash" : "code-slash-outline"}
-                color={color}
+                color={focused ? "orange" : "black"}
               />
             ),
           }}
-        />
+        /> */}
         <Tabs.Screen
           name="savedFiles"
           options={{
             title: "Saved Files",
             tabBarIcon: ({ color, focused }) => (
-              <AntDesign name="filetext1" size={24} color={color} />
+              <AntDesign
+                name="filetext1"
+                size={24}
+                color={focused ? "orange" : "black"}
+              />
               // <TabBarIcon
               //   name={focused ? "code-slash" : "code-slash-outline"}
               //   color={color}
