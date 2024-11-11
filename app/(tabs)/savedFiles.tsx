@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
@@ -23,45 +24,44 @@ const SavedFiles = () => {
     }>
   >([]);
   const [refresh, setRefresh] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        const folderUri = FileSystem.documentDirectory + "userData/";
-        const fileList = await FileSystem.readDirectoryAsync(folderUri);
-        const filesWithInfo = await Promise.all(
-          fileList.map(async (fileName) => {
-            const fileUri = folderUri + fileName;
-            const fileInfo = await FileSystem.getInfoAsync(fileUri);
-            if (fileInfo.exists) {
-              return {
-                name: fileName,
-                uri: fileUri,
-                modificationTime: fileInfo.modificationTime,
-                size: fileInfo.size,
-              };
-            } else {
-              // Skip files that do not exist
-              return null;
-            }
-          })
-        );
-        // Filter out null values
-        const validFiles = filesWithInfo
-          .filter((file): file is NonNullable<typeof file> => file !== null)
-          .sort(
-            (a, b) => (b.modificationTime || 0) - (a.modificationTime || 0)
-          );
-        setFiles(validFiles);
-      } catch (error) {
-        console.log("Error fetching files", error);
-        handleError(error);
-      } finally {
-        setRefresh(false);
-      }
-    };
-    fetchFiles();
-  }, [refresh]);
+  const fetchFiles = useCallback(async () => {
+    try {
+      const folderUri = FileSystem.documentDirectory + "userData/";
+      const fileList = await FileSystem.readDirectoryAsync(folderUri);
+      const filesWithInfo = await Promise.all(
+        fileList.map(async (fileName) => {
+          const fileUri = folderUri + fileName;
+          const fileInfo = await FileSystem.getInfoAsync(fileUri);
+          if (fileInfo.exists) {
+            return {
+              name: fileName,
+              uri: fileUri,
+              modificationTime: fileInfo.modificationTime,
+              size: fileInfo.size,
+            };
+          } else {
+            // Skip files that do not exist
+            return null;
+          }
+        })
+      );
+      // Filter out null values
+      const validFiles = filesWithInfo
+        .filter((file): file is NonNullable<typeof file> => file !== null)
+        .sort((a, b) => (b.modificationTime || 0) - (a.modificationTime || 0));
+      setFiles(validFiles);
+    } catch (error) {
+      console.log("Error fetching files", error);
+      handleError(error);
+    } finally {
+      setRefresh(false);
+    }
+  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFiles(); // Refresh the file list whenever the screen is focused
+    }, [fetchFiles])
+  );
 
   const formatDate = (timestamp?: number) => {
     if (!timestamp) {
@@ -155,9 +155,9 @@ const SavedFiles = () => {
         <Text className="text-lg text-center text-light-text-color ">
           Saved Files
         </Text>
-        <TouchableOpacity onPress={() => setRefresh(true)}>
+        {/* <TouchableOpacity onPress={() => setRefresh(true)}>
           <Feather name="refresh-ccw" size={24} color="white" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View className="mt-4 mx-3 flex-1 ">
         {refresh ? (
@@ -172,7 +172,7 @@ const SavedFiles = () => {
             keyExtractor={(item) => item.uri}
             ListEmptyComponent={() => <Text>No files saved</Text>}
             refreshing={refresh}
-            onRefresh={() => setRefresh(true)}
+            onRefresh={fetchFiles}
           />
         )}
       </View>
