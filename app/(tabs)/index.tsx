@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import DeviceModal from "../../components/DeviceConnectionModal";
@@ -21,43 +21,41 @@ export default function index() {
     isDataStreaming,
     // packetNumber,
   } = useBLE(isRecordingRef);
+
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
-  React.useEffect(() => {
-    if (connectedDevice) {
-      setIsConnected(true);
-    } else {
-      setIsConnected(false);
-    }
-  }, [connectedDevice]);
-
-  const scanForDevices = async () => {
+  const [isRecordingPaused, setIsRecordingPaused] = useState<boolean>(false); // User paused the data streaming and need to decide what to do with saved data
+  useEffect(() => {
+    console.log("isRecordingpaused", isRecordingPaused);
+  }, [isRecordingPaused]);
+  const scanForDevices = useCallback(async () => {
     const isPermissionsEnabled = await requestPermissions();
     console.log("isPermissionsEnabled", isPermissionsEnabled);
     if (isPermissionsEnabled) {
       scanForPeripherals();
     }
-  };
+  }, [requestPermissions, scanForPeripherals]);
 
-  const hideModal = () => {
+  const hideModal = useCallback(() => {
     setIsModalVisible(false);
-  };
+  }, []);
 
-  const openModal = async () => {
+  const openModal = useCallback(async () => {
     scanForDevices();
     setIsModalVisible(true);
-  };
+  }, [scanForDevices]);
 
-  const handleDataStreamingToggle = async (value: boolean) => {
-    if (isLoading) return; //prevent multiple roggles
-    setIsLoading(true);
-    if (connectedDevice) {
-      await toggleDataStreaming(connectedDevice, value ? "S" : "P");
-    }
-    setIsLoading(false);
-  };
+  const handleDataStreamingToggle = useCallback(
+    async (value: boolean) => {
+      if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
+      setIsLoading(true);
+      if (connectedDevice) {
+        await toggleDataStreaming(connectedDevice, value ? "S" : "P");
+      }
+      setIsLoading(false);
+    },
+    [isLoading, connectedDevice, toggleDataStreaming, isRecordingPaused]
+  );
 
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
@@ -72,7 +70,7 @@ export default function index() {
             <View className="mt-16 flex-row flex gap-x-1 justify-center items-center">
               <Text className="text-xl font-bold text-primary-color">
                 {connectedDevice.name} is{" "}
-                {isConnected ? "Connected" : "Disconnected"}
+                {connectedDevice ? "Connected" : "Disconnected"}
               </Text>
               {/* <TouchableOpacity onPress={disconnectDevice} className="ml-2">
                 <Ionicons
@@ -94,7 +92,7 @@ export default function index() {
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
               isLoading={isLoading}
-              // packetNumber={packetNumber}
+              isRecordingPaused={isRecordingPaused}
             />
 
             {/* {packet && (
@@ -105,6 +103,8 @@ export default function index() {
             <Record
               isDataStreaming={isDataStreaming}
               isRecordingRef={isRecordingRef}
+              isRecordingPaused={isRecordingPaused}
+              setIsRecordingPaused={setIsRecordingPaused}
             />
           </>
         ) : (

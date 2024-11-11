@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text } from "react-native";
-import SensorColumn from "@/components/tabs/SensorColumn";
+// import SensorColumn from "@/components/tabs/SensorColumn";
 import { Switch } from "react-native";
 import PulsingRings from "./PulsingRings";
 interface SignalQualityProps {
@@ -8,12 +8,13 @@ interface SignalQualityProps {
   onToggleDataStreaming: (value: boolean) => void;
   isLoading: boolean;
   packetNumber?: number;
+  isRecordingPaused: boolean;
 }
 const SignalQuality: React.FC<SignalQualityProps> = ({
   isDataStreaming,
   onToggleDataStreaming,
   isLoading,
-  // packetNumber,
+  isRecordingPaused,
 }) => {
   return (
     <>
@@ -22,12 +23,13 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
           <Text className="flex-1 text-center font-bold text-base text-white">
             {isDataStreaming ? "Pause" : "Start"} Data Streaming
           </Text>
+
           <Switch
             trackColor={{ false: "#767577", true: "#81b0ff" }}
             thumbColor={isDataStreaming ? "#f5dd4b" : "#f4f3f4"}
             onValueChange={onToggleDataStreaming}
             value={isDataStreaming}
-            disabled={isLoading} // Disable switch while toggling
+            disabled={isLoading || isRecordingPaused} // Disable switch while toggling or data recording is paused
           />
         </View>
         {isDataStreaming ? (
@@ -61,5 +63,4 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
     </>
   );
 };
-
-export default SignalQuality;
+export default React.memo(SignalQuality);

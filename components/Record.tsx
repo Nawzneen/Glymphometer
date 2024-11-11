@@ -3,23 +3,38 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
-import { handleError } from "@/utils/handleError";
+
 interface RecordProps {
   isDataStreaming: boolean;
   isRecordingRef: React.MutableRefObject<boolean>;
+  isRecordingPaused: boolean;
+  setIsRecordingPaused: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const Record: React.FC<RecordProps> = ({ isDataStreaming, isRecordingRef }) => {
+const Record: React.FC<RecordProps> = ({
+  isDataStreaming,
+  isRecordingRef,
+  isRecordingPaused,
+  setIsRecordingPaused,
+}) => {
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
   // Update the ref whenever isRecording changes
 
   useEffect(() => {
     setError("");
-    setIsRecording(false);
-    setIsPaused(false);
-    setDuration(0);
+    if (!isDataStreaming && isRecording) {
+      // Data streaming has stopped while recording
+      setIsRecording(false);
+      setIsRecordingPaused(true);
+      isRecordingRef.current = false;
+      setError("Data streaming stopped while recording");
+    } else if (!isDataStreaming && !isRecording) {
+      // Data streaming stopped and not recording
+      setIsRecordingPaused(false);
+      setDuration(0);
+    }
+    //Do not add isRecording to the dependency array
   }, [isDataStreaming]);
   useEffect(() => {
     setError("");
@@ -41,7 +56,7 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming, isRecordingRef }) => {
   }, [isRecording]);
   function startRecordingData() {
     if (isDataStreaming) {
-      setIsPaused(false);
+      setIsRecordingPaused(false);
       setIsRecording(true);
       isRecordingRef.current = true;
       setDuration(0); //Reset the duration when recording starts
@@ -50,29 +65,29 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming, isRecordingRef }) => {
     }
   }
   function stopRecordingData() {
-    if (isDataStreaming) {
+    if (isRecording) {
       setIsRecording(false);
-      setIsPaused(true);
+      setIsRecordingPaused(true);
       isRecordingRef.current = false;
     }
   }
   function discardData() {
     setIsRecording(false);
-    setIsPaused(false);
+    setIsRecordingPaused(false);
     setDuration(0);
     clearDataBuffer();
   }
   async function handleSaveData() {
     const dataBuffer = getDataBuffer();
     await saveDataToFile(dataBuffer);
-    clearDataBuffer();
-    setIsPaused(false);
+    setIsRecordingPaused(false);
     setIsRecording(false);
     setDuration(0);
+    clearDataBuffer();
   }
   return (
     <View className="flex  justify-center items-center bg-white mt-4 py-4">
-      {isPaused ? (
+      {isRecordingPaused ? (
         <View>
           <Text className="text-base text-primary-text-color">
             Do you want to save the data?
@@ -101,7 +116,7 @@ const Record: React.FC<RecordProps> = ({ isDataStreaming, isRecordingRef }) => {
                 <Ionicons name="play-circle" size={60} color={"black"} />
               </TouchableOpacity>
             )}
-            {isPaused ? (
+            {isRecordingPaused ? (
               <TouchableOpacity>
                 <Ionicons name="stop-circle" size={60} color="red" />
               </TouchableOpacity>
