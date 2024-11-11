@@ -4,7 +4,7 @@ import * as Sharing from "expo-sharing";
 import { handleError } from "./handleError";
 import Toast from "react-native-toast-message";
 import { requestPermissions } from "./requestPermissions";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "./bleConnection";
 import base64 from "react-native-base64";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
@@ -63,7 +63,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
-          clearDataBuffer(); // Clear the data buffer
+          clearDataBuffer(); // Clear the data buffer when device disconnected
           setConnectedDevice(null);
 
           Toast.show({
@@ -172,64 +172,67 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
 
   //FUNCTION TO TOGGLE DATA STREAMING, SPECIFIC TO GM5
   // S starts the data streaming, P pauses the data streaming
-  const toggleDataStreaming = async (device: Device, command: string) => {
-    const status = command === "S" ? "Start" : "Pause";
-    if (!device) {
-      Toast.show({
-        type: "error",
-        text1: "No Device is Connected.",
-        text2: "No Device is Connected.",
-        position: "top", // Consistent position
-      });
-      return;
-    }
-
-    // Prevent duplicate actions/toggles
-    if (
-      (command === "S" && isDataStreaming) ||
-      (command === "P" && !isDataStreaming)
-    ) {
-      Toast.show({
-        type: "error",
-        text1: `Data Streaming Already ${
-          command === "S" ? "Started" : "Paused"
-        }`,
-        text2: `Cannot ${
-          command === "S" ? "start" : "pause"
-        } again without toggling.`,
-        position: "bottom",
-      });
-      return;
-    }
-    //Encode the command string to base64
-    const base64Command = base64.encode(command);
-    try {
-      await device.writeCharacteristicWithResponseForService(
-        DATA_SERVICE_UUID,
-        RX_CHARACTERISTIC_UUID,
-        base64Command
-      );
-      if (command === "S") {
-        dataStreaming(device); // Start data streaming
-      } else if (command === "P") {
-        // Stop data streaming and remove listener
-        if (dataSubscription.current) {
-          dataSubscription.current.remove();
-          dataSubscription.current = null;
-        }
+  const toggleDataStreaming = useCallback(
+    async (device: Device, command: string) => {
+      const status = command === "S" ? "Start" : "Pause";
+      if (!device) {
+        Toast.show({
+          type: "error",
+          text1: "No Device is Connected.",
+          text2: "No Device is Connected.",
+          position: "top", // Consistent position
+        });
+        return;
       }
-      setIsDataStreaming(command === "S"); //set true if command is S
-      Toast.show({
-        type: "success",
-        text1: `Data Streaming ${status}ed`,
-        text2: `Data streaming has been ${status.toLowerCase()}ed.`,
-        position: "top",
-      });
-    } catch (error: unknown) {
-      handleError(error, `Error ${status}ing data streaming`);
-      // setIsDataStreaming(command === "P");
-    }
-  };
+
+      // Prevent duplicate actions/toggles
+      if (
+        (command === "S" && isDataStreaming) ||
+        (command === "P" && !isDataStreaming)
+      ) {
+        Toast.show({
+          type: "error",
+          text1: `Data Streaming Already ${
+            command === "S" ? "Started" : "Paused"
+          }`,
+          text2: `Cannot ${
+            command === "S" ? "start" : "pause"
+          } again without toggling.`,
+          position: "bottom",
+        });
+        return;
+      }
+      //Encode the command string to base64
+      const base64Command = base64.encode(command);
+      try {
+        await device.writeCharacteristicWithResponseForService(
+          DATA_SERVICE_UUID,
+          RX_CHARACTERISTIC_UUID,
+          base64Command
+        );
+        if (command === "S") {
+          dataStreaming(device); // Start data streaming
+        } else if (command === "P") {
+          // Stop data streaming and remove listener
+          if (dataSubscription.current) {
+            dataSubscription.current.remove();
+            dataSubscription.current = null;
+          }
+        }
+        setIsDataStreaming(command === "S"); //set true if command is S
+        Toast.show({
+          type: "success",
+          text1: `Data Streaming ${status}ed`,
+          text2: `Data streaming has been ${status.toLowerCase()}ed.`,
+          position: "top",
+        });
+      } catch (error: unknown) {
+        handleError(error, `Error ${status}ing data streaming`);
+        // setIsDataStreaming(command === "P");
+      }
+    },
+    [connectedDevice, isDataStreaming, dataSubscription]
+  );
 
   // FUNCTION FOR DATA STREAMING
   const dataStreaming = (

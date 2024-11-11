@@ -112,4 +112,4 @@ const DeviceModal: FC<DeviceModalProps> = (props) => {
   );
 };
 
-export default DeviceModal;
+export default React.memo(DeviceModal);
