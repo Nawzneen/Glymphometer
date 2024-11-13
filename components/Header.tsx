@@ -1,14 +1,14 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 interface HeaderProps {
-  title: string;
+  // title: string;
   onButtonPress?: () => void;
 }
-const Header: React.FC<HeaderProps> = ({ title = "My App", onButtonPress }) => (
+const Header: React.FC<HeaderProps> = ({ onButtonPress }) => (
   <View className="relative mb-8 px-4 h-16  flex flex-row justify-between items-center bg-primary-text-color ">
     <View className="absolute shadow-black shadow-2xl" />
     <Text className="text-center font-bold text-xl text-light-text-color">
-      {title}
+      Glympho<Text className="text-primary-color">Link</Text>
     </Text>
     {/* <View className="flex flex-row items-center justify-center gap-x-2 text-base">
       <View className="rounded-full bg-success-color w-[25px] h-[25px]" />

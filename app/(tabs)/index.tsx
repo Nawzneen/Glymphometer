@@ -59,7 +59,7 @@ export default function index() {
 
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
-      <View className="flex flex-row gap-x-2 items-center justify-center  ">
+      <View className="mt-8 flex flex-row gap-x-2 items-center justify-center  ">
         <View>
           <CustomButton title="Connect to GM5" onPress={openModal} />
         </View>

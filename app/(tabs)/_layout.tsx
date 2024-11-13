@@ -13,7 +13,7 @@ export default function TabLayout() {
   return (
     <View className="flex flex-1 bg-gray-100">
       {/* Custom Header Component */}
-      <Header title="Glymphometer" />
+      <Header />
 
       {/* Tabs at the bottom */}
       <Tabs
