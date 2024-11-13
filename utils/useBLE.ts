@@ -1,13 +1,10 @@
-// useBLE.native.ts
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import { handleError } from "./handleError";
 import Toast from "react-native-toast-message";
 import { requestPermissions } from "./requestPermissions";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "./bleConnection";
 import base64 from "react-native-base64";
-import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
+import { clearDataBuffer } from "@/utils/dataBuffer";
 
 import {
   BleError,
@@ -30,7 +27,7 @@ const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Rec
 
 function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
-  const [packet, setPacket] = useState<string>(""); //Track the received data packet
+  // const [packet, setPacket] = useState<string>(""); //Track the received data packet
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
   const [isDataStreaming, setIsDataStreaming] = useState<boolean>(false); //Track data streaming status
   // Initialization and BLE State Listener
@@ -42,13 +39,14 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
       // Clean up dataSubscription
       if (dataSubscription.current) {
         clearDataBuffer(); // Clear the data buffer
+        console.log("datasubscription remove on umount");
         dataSubscription.current.remove();
         dataSubscription.current = null;
       }
     };
   }, []);
 
-  //If devices is disconnected or turned off, set the connected device to null
+  //If devices is disconnected or turned off, set the connected device to null and remove the datasubpscription
   useEffect(() => {
     let disconnectSubscription: Subscription | undefined;
     if (connectedDevice) {
@@ -131,10 +129,15 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
 
   // Function to connect to a BLE device
   const handleConnectToDevice = async (device: Device) => {
+    clearDataBuffer(); // Clear the data buffer before disconnecting to any device
     await connectToDevice(connectedDevice, device, setConnectedDevice);
   };
   // Function to disconnect from a BLE device
   const handleDisconnectDevice = async () => {
+    if (connectedDevice) {
+      console.log("pause data streaming when disconnecting");
+      await toggleDataStreaming(connectedDevice, "P");
+    }
     await disconnectDevice(connectedDevice, setConnectedDevice);
   };
 
@@ -174,6 +177,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   // S starts the data streaming, P pauses the data streaming
   const toggleDataStreaming = useCallback(
     async (device: Device, command: string) => {
+      console.log("toogle data", command);
       const status = command === "S" ? "Start" : "Pause";
       if (!device) {
         Toast.show({
@@ -215,11 +219,12 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
         } else if (command === "P") {
           // Stop data streaming and remove listener
           if (dataSubscription.current) {
+            console.log("datasubsccription removed when paused");
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
         }
-        setIsDataStreaming(command === "S"); //set true if command is S
+        setIsDataStreaming(command === "S"); //set true if command is S, set false if command is p
         Toast.show({
           type: "success",
           text1: `Data Streaming ${status}ed`,
@@ -247,6 +252,9 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
         .then((mtu) => {
           // Before setting up a new listener, remove any existing one
           if (dataSubscription.current) {
+            console.log(
+              "data subscription remove before setting up new datasubscription in datastreaming"
+            );
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
@@ -276,11 +284,12 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
           console.log("Error Code:", error.errorCode);
           console.log(BleErrorCode.DeviceDisconnected);
           if (error.errorCode === BleErrorCode.DeviceDisconnected) {
-            console.log("i am running");
             if (dataSubscription.current) {
               dataSubscription.current.remove();
               dataSubscription.current = null;
-              console.log("Data subscription removed in onDataUpdate");
+              console.log(
+                "Data subscription removed in onDataUpdate when device disconnected"
+              );
             }
             setIsDataStreaming(false);
           }
@@ -299,10 +308,10 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
           }
           // this is decimal values of each paceket [83,83,...,69,69]
           // console.log("byteArray", byteArray);
-          console.log("isRecordingRef", isRecordingRef.current);
+          // console.log("isRecordingRef", isRecordingRef.current);
           if (isRecordingRef.current) {
             addToDataBuffer(byteArray); // Accumulate binary data
-            console.log("data is being recorded");
+            // console.log("data is being recorded");
           }
 
           // console.log("data is streaming");
@@ -325,7 +334,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     scanForPeripherals, // Function to start scanning for devices
     toggleDataStreaming, // Function to start or pause data streaming for GM5
     dataStreaming, // Function to start data streaming for GM5
-    packet, // Received data packet
+    // packet, // Received data packet
     isDataStreaming, // Data streaming status
     setIsDataStreaming, // Set data streaming status
     // packetNumber, // Packet number
