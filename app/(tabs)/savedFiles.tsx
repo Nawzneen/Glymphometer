@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { createFolder } from "@/utils/saveData";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
@@ -24,6 +25,9 @@ const SavedFiles = () => {
     }>
   >([]);
   const [refresh, setRefresh] = useState<boolean>(false);
+  useEffect(() => {
+    createFolder();
+  }, []);
   const fetchFiles = useCallback(async () => {
     try {
       const folderUri = FileSystem.documentDirectory + "userData/";
@@ -62,6 +66,7 @@ const SavedFiles = () => {
       fetchFiles(); // Refresh the file list whenever the screen is focused
     }, [fetchFiles])
   );
+  // if its a new user, create the folder else it will throw an error
 
   const formatDate = (timestamp?: number) => {
     if (!timestamp) {

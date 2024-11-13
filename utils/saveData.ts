@@ -28,7 +28,7 @@ export const saveDataToFile = async (dataBuffer: number[]) => {
     handleError(error, "Error saving data to file");
   }
 };
-const createFolder = async () => {
+export const createFolder = async () => {
   const folderUri = FileSystem.documentDirectory + "userData/";
   const folderInfo = await FileSystem.getInfoAsync(folderUri);
 
