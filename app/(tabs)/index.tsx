@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-import DeviceModal from "../../components/DeviceConnectionModal";
+import DeviceModal from "../../components/modals/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";

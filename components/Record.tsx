@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
+import Foundation from "@expo/vector-icons/Foundation";
+import ChooseFileNameModal from "./modals/ChooseFileNameModal";
 
 interface RecordProps {
   isDataStreaming: boolean;
@@ -19,8 +21,9 @@ const Record: React.FC<RecordProps> = ({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
-  // Update the ref whenever isRecording changes
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  // Handle changes in data streaming or recording
   useEffect(() => {
     setError("");
     if (!isDataStreaming && isRecording) {
@@ -36,6 +39,8 @@ const Record: React.FC<RecordProps> = ({
     }
     //Do not add isRecording to the dependency array
   }, [isDataStreaming]);
+
+  // Handle duration with interval
   useEffect(() => {
     setError("");
     let interval: NodeJS.Timeout | null = null;
@@ -54,6 +59,8 @@ const Record: React.FC<RecordProps> = ({
       }
     };
   }, [isRecording]);
+
+  //Start recording data
   function startRecordingData() {
     if (isDataStreaming) {
       setIsRecordingPaused(false);
@@ -64,27 +71,40 @@ const Record: React.FC<RecordProps> = ({
       setError("Enable data streaming first to start recording");
     }
   }
+  //Stop recording data
   function stopRecordingData() {
     if (isRecording) {
       setIsRecording(false);
       setIsRecordingPaused(true);
       isRecordingRef.current = false;
+      setModalVisible(true); // Show modal to save/discard data
     }
   }
+  // Discard Data
   function discardData() {
     setIsRecording(false);
     setIsRecordingPaused(false);
     setDuration(0);
     clearDataBuffer();
+    setModalVisible(false);
   }
-  async function handleSaveData() {
-    const dataBuffer = getDataBuffer();
-    await saveDataToFile(dataBuffer);
-    setIsRecordingPaused(false);
-    setIsRecording(false);
-    setDuration(0);
-    clearDataBuffer();
-  }
+
+  // Save Data
+
+  const handleSaveData = async (fileName: string) => {
+    try {
+      const dataBuffer = getDataBuffer();
+      await saveDataToFile(dataBuffer, fileName);
+      setIsRecordingPaused(false);
+      setIsRecording(false);
+      setDuration(0);
+      clearDataBuffer();
+      setModalVisible(false);
+    } catch (error) {
+      // handleError(error, "Error saving data");
+      setError("Error saving data to file");
+    }
+  };
   return (
     <View className="flex  justify-center items-center bg-white mt-4 py-4">
       {isRecordingPaused ? (
@@ -96,7 +116,10 @@ const Record: React.FC<RecordProps> = ({
             <TouchableOpacity className="" onPress={discardData}>
               <Ionicons name="close-circle" size={60} color={"black"} />
             </TouchableOpacity>
-            <TouchableOpacity className="" onPress={handleSaveData}>
+            <TouchableOpacity
+              className=""
+              onPress={() => setModalVisible(true)}
+            >
               <Ionicons name="checkmark-circle" size={60} color={"black"} />
             </TouchableOpacity>
           </View>
@@ -109,11 +132,13 @@ const Record: React.FC<RecordProps> = ({
           <View className="flex flex-row  justify-center items-center gap-x-3 mt-2">
             {isRecording ? (
               <TouchableOpacity>
-                <Ionicons name="play-circle" size={60} color={"red"} />
+                <Foundation name="record" size={68} color="red" />
+                {/* <Ionicons name="play-circle" size={68} color={"red"} /> */}
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={startRecordingData}>
-                <Ionicons name="play-circle" size={60} color={"black"} />
+                <Foundation name="record" size={68} color="black" />
+                {/* <Ionicons name="play-circle" size={60} color={"black"} /> */}
               </TouchableOpacity>
             )}
             {isRecordingPaused ? (
@@ -137,7 +162,14 @@ const Record: React.FC<RecordProps> = ({
           </Text>
         </Text>
       </View>
-      <Text className="text-red-500 mt-2">{error}</Text>
+      {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+
+      {/* Modal for choosing file name */}
+      <ChooseFileNameModal
+        visible={modalVisible}
+        onSave={handleSaveData}
+        onDiscard={discardData}
+      />
     </View>
   );
 };

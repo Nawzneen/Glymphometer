@@ -3,13 +3,22 @@ import { Buffer } from "buffer";
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";
 
-export const saveDataToFile = async (dataBuffer: number[]) => {
+// Function to sanitize the file name
+const sanitizeFilename = (fileName: string): string => {
+  return fileName.replace(/[^a-z0-9_\-]/gi, "_"); //invalid characters will be replaced by underscores
+};
+export const saveDataToFile = async (
+  dataBuffer: number[],
+  fileName: string
+) => {
   try {
     const uint8Array = new Uint8Array(dataBuffer);
     const base64Data = Buffer.from(uint8Array).toString("base64");
 
     const folderUri = await createFolder();
-    const fileUri = folderUri + `streamingData_${Date.now()}.bin`;
+    const sanitizedFileName = sanitizeFilename(fileName);
+    const fileUri = folderUri + `${sanitizedFileName}_${Date.now()}.bin`;
+
     await FileSystem.writeAsStringAsync(fileUri, base64Data, {
       encoding: FileSystem.EncodingType.Base64,
     });
