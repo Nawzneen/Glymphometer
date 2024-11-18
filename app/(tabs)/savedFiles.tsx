@@ -3,6 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
+import { validateData } from "@/utils/validateData";
 import {
   FlatList,
   SafeAreaView,
@@ -136,6 +137,9 @@ const SavedFiles = () => {
             <TouchableOpacity onPress={() => deleteFile(fileUri)}>
               <AntDesign name="delete" size={24} color="black" />
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => validateData(fileUri)}>
+              <Text>Info</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -151,6 +155,8 @@ const SavedFiles = () => {
     } catch (error) {
       handleError(error, "Error deleting file");
       console.error("Error deleting file", error);
+    } finally {
+      setRefresh(false);
     }
   };
 
