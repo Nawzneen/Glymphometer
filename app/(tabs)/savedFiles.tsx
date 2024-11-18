@@ -16,7 +16,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import FileInfoModal from "@/components/modals/FileInfoModal";
-import FileInfoType from "@/types/FileInfo";
+import { FileInfoType } from "@/types/globalTypes";
 
 const SavedFiles = () => {
   const [files, setFiles] = useState<

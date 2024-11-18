@@ -6,7 +6,7 @@ import {
   View,
   Text,
 } from "react-native";
-import FileInfoType from "@/types/FileInfo";
+import { FileInfoType } from "@/types/globalTypes";
 
 interface FileInfoModalProps {
   info: FileInfoType | null | undefined;
