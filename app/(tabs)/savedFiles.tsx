@@ -15,6 +15,8 @@ import { createFolder } from "@/utils/saveData";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
+import FileInfoModal from "@/components/modals/FileInfoModal";
+import FileInfoType from "@/types/FileInfo";
 
 const SavedFiles = () => {
   const [files, setFiles] = useState<
@@ -26,6 +28,10 @@ const SavedFiles = () => {
     }>
   >([]);
   const [refresh, setRefresh] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [fileInfo, setFileInfo] = useState<FileInfoType | null | undefined>(
+    null
+  );
   useEffect(() => {
     createFolder();
   }, []);
@@ -37,6 +43,7 @@ const SavedFiles = () => {
         fileList.map(async (fileName) => {
           const fileUri = folderUri + fileName;
           const fileInfo = await FileSystem.getInfoAsync(fileUri);
+
           if (fileInfo.exists) {
             return {
               name: fileName,
@@ -107,6 +114,16 @@ const SavedFiles = () => {
     const formattedDate = formatDate(item.modificationTime);
     const formattedSize = formatFileSize(item.size);
 
+    const handleFileInfo = async (fileUri: string) => {
+      const info = await validateData(fileUri);
+      // console.log("info in validate data ", info);
+      if (info) {
+        setFileInfo(info);
+        setIsModalVisible(true);
+      } else {
+        console.log("failed to validate data");
+      }
+    };
     return (
       <View className="mb-4 py-3 px-3 gap-x-1 rounded-lg flex flex-col justify-between bg-gray-200">
         <View className="flex flex-row justify-between items-center">
@@ -132,13 +149,13 @@ const SavedFiles = () => {
             gap-x-3"
           >
             <TouchableOpacity onPress={() => shareFile(fileUri)}>
-              <AntDesign name="sharealt" size={24} color="black" />
+              <AntDesign name="sharealt" size={26} color="black" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => deleteFile(fileUri)}>
-              <AntDesign name="delete" size={24} color="black" />
+              <AntDesign name="delete" size={26} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => validateData(fileUri)}>
-              <Text>Info</Text>
+            <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
+              <AntDesign name="infocirlceo" size={26} color="black" />
             </TouchableOpacity>
           </View>
         </View>
@@ -188,6 +205,11 @@ const SavedFiles = () => {
         )}
       </View>
       <Toast />
+      <FileInfoModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        info={fileInfo}
+      />
     </SafeAreaView>
   );
 };
