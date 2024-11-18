@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Device } from "react-native-ble-plx";
-import CustomButton from "./CustomButton";
+import CustomButton from "../CustomButton";
 
 type DeviceModalListItemProps = {
   item: ListRenderItemInfo<Device>;
