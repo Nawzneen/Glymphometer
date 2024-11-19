@@ -5,6 +5,11 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "./bleConnection";
 import base64 from "react-native-base64";
 import { clearDataBuffer } from "@/utils/dataBuffer";
+import {
+  DATA_SERVICE_UUID,
+  RX_CHARACTERISTIC_UUID,
+  TX_CHARACTERISTIC_UUID,
+} from "./bleConstants";
 
 import {
   BleError,
@@ -20,10 +25,6 @@ import { Buffer } from "buffer";
 if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
 }
-// Device Characteristitcs UUIDs specific to GM5
-const DATA_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Service UUID for handling data
-const RX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //To Send Data / write
-const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Recieve UUID / notify
 
 function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
