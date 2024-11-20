@@ -1,6 +1,4 @@
-import React from "react";
 import * as FileSystem from "expo-file-system";
-import { Buffer } from "buffer";
 
 // Function to read binary data from a file
 const readBinaryDataFromFile = async (
@@ -104,7 +102,10 @@ const calculateExpectedPackets = (
     return 65535 - firstPacketNumber + 1 + (lastPacketNumber + 1);
   }
 };
-
+const calculateDuration = (receivedPackets: number) => {
+  const duration = receivedPackets * 0.056; // Each packet receives in 56ms
+  return { duration };
+};
 // Function to calculate packet loss and percentage
 const calculatePacketLoss = (
   expectedPackets: number,
@@ -157,6 +158,8 @@ export const validateData = async (fileUri: string) => {
     expectedPacketsNumber,
     packetNumbersSet.size
   );
+  // Calculate duration of recording
+  const { duration } = calculateDuration(packetNumbersSet.size);
 
   // Output results
   console.log(`First Packet Number: ${firstPacketNumber}`);
@@ -178,5 +181,6 @@ export const validateData = async (fileUri: string) => {
     expectedPacketsNumber,
     packetLoss,
     packetLossPercentage,
+    duration,
   };
 };

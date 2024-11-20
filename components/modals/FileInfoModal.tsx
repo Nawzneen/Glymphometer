@@ -25,6 +25,7 @@ const FileInfoModal: FC<FileInfoModalProps> = ({
     lastPacketNumber,
     duplicatePackets,
     expectedPacketsNumber,
+    duration,
     packetLoss,
     packetLossPercentage,
   } = info || {};
@@ -57,6 +58,10 @@ const FileInfoModal: FC<FileInfoModalProps> = ({
                 <Text className="font-bold text-primary-color">
                   {packetsNumbre}
                 </Text>
+              </Text>
+              <Text className="text-base ">
+                Total Duration of Packets in Seconds:{" "}
+                <Text className="font-bold text-primary-color">{duration}</Text>
               </Text>
               <Text className="text-base ">
                 First Packet Number:{" "}
