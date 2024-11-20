@@ -6,4 +6,5 @@ export interface FileInfoType {
   expectedPacketsNumber: number;
   packetLoss: number;
   packetLossPercentage: string;
+  duration: number;
 }
