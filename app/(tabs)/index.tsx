@@ -3,7 +3,6 @@ import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import DeviceModal from "../../components/modals/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
@@ -15,11 +14,10 @@ export default function index() {
     connectedDevice,
     handleConnectToDevice,
     handleDisconnectDevice,
-    toggleDataStreaming,
+    handleToggleDataStreaming,
     requestPermissions,
     scanForPeripherals,
     isDataStreaming,
-    // packetNumber,
   } = useBLE(isRecordingRef);
 
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -50,16 +48,16 @@ export default function index() {
       if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
       setIsLoading(true);
       if (connectedDevice) {
-        await toggleDataStreaming(connectedDevice, value ? "S" : "P");
+        await handleToggleDataStreaming(value ? "S" : "P");
       }
       setIsLoading(false);
     },
-    [isLoading, connectedDevice, toggleDataStreaming, isRecordingPaused]
+    [isLoading, connectedDevice, handleToggleDataStreaming, isRecordingPaused]
   );
 
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
-      <View className="mt-8 flex flex-row gap-x-2 items-center justify-center  ">
+      <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
         <View>
           <CustomButton title="Connect to GM5" onPress={openModal} />
         </View>
@@ -67,7 +65,7 @@ export default function index() {
       <View className="">
         {connectedDevice ? (
           <>
-            <View className="mt-16 flex-row flex gap-x-1 justify-center items-center">
+            <View className="mt-8 flex-row flex gap-x-1 justify-center items-center">
               <Text className="text-xl font-bold text-primary-color">
                 {connectedDevice.name} is{" "}
                 {connectedDevice ? "Connected" : "Disconnected"}
@@ -87,7 +85,6 @@ export default function index() {
                 <AntDesign name="disconnect" size={24} color="black" />
               </TouchableOpacity>
             </View>
-
             <SignalQuality
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
