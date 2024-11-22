@@ -160,6 +160,23 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     }
   };
 
+  //FUNCTION TO ADJUST LED LIGHT LEVEL
+  //** This function should only work if the isDataStreaming true. */
+  const handleLEDLevel = async (value: number) => {
+    if (!isDataStreaming) {
+      handleError(
+        "Data streaming is should be active for this function to work"
+      );
+      return;
+    }
+    if (connectedDevice) {
+      const LEDLevel = value.toString();
+      await adjustLEDLevel(LEDLevel, connectedDevice);
+    } else {
+      console.log("No device connected");
+    }
+  };
+
   const handleToggleDataStreaming = useCallback(
     async (command: string) => {
       await toggleDataStreaming(

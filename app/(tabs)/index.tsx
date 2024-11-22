@@ -3,10 +3,12 @@ import CustomButton from "../../components/CustomButton";
 import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
 import DeviceModal from "../../components/modals/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
+import AdjustLEDLevel from "@/components/AdjustLEDLevel";
 export default function index() {
   const isRecordingRef = useRef(false);
   const {
@@ -15,11 +17,13 @@ export default function index() {
     handleConnectToDevice,
     handleDisconnectDevice,
     handleToggleDataStreaming,
+    handleLEDLevel,
     requestPermissions,
     scanForPeripherals,
     isDataStreaming,
+    // packetNumber,
   } = useBLE(isRecordingRef);
-
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
   const [isRecordingPaused, setIsRecordingPaused] = useState<boolean>(false); // User paused the data streaming and need to decide what to do with saved data
@@ -85,6 +89,11 @@ export default function index() {
                 <AntDesign name="disconnect" size={24} color="black" />
               </TouchableOpacity>
             </View>
+            <AdjustLEDLevel
+              handleLEDLevel={handleLEDLevel}
+              isDataStreaming={isDataStreaming}
+              isRecording={isRecording}
+            />
             <SignalQuality
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
@@ -102,6 +111,8 @@ export default function index() {
               isRecordingRef={isRecordingRef}
               isRecordingPaused={isRecordingPaused}
               setIsRecordingPaused={setIsRecordingPaused}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
             />
           </>
         ) : (

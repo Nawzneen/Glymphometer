@@ -20,5 +20,4 @@ android/
 expo-env.d.ts
 # @end expo-cli
 
-utils/dataStreaming.ts
-components/ChooseFileNameModal.tsx
+utils/backup-bleResponseSubscription.ts

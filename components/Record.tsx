@@ -1,5 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  FC,
+  MutableRefObject,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
@@ -8,17 +16,20 @@ import ChooseFileNameModal from "./modals/ChooseFileNameModal";
 
 interface RecordProps {
   isDataStreaming: boolean;
-  isRecordingRef: React.MutableRefObject<boolean>;
+  isRecordingRef: MutableRefObject<boolean>;
   isRecordingPaused: boolean;
-  setIsRecordingPaused: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsRecordingPaused: Dispatch<SetStateAction<boolean>>;
+  isRecording: boolean;
+  setIsRecording: Dispatch<SetStateAction<boolean>>;
 }
-const Record: React.FC<RecordProps> = ({
+const Record: FC<RecordProps> = ({
   isDataStreaming,
   isRecordingRef,
+  isRecording,
+  setIsRecording,
   isRecordingPaused,
   setIsRecordingPaused,
 }) => {
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
