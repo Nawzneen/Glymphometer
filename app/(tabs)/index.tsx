@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "../../components/CustomButton";
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+  Button,
+  FlatList,
+} from "react-native";
 import DeviceModal from "../../components/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,8 +15,14 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
+import { loginAndGetToken } from "./services/authService";
+import Constants from "expo-constants";
+import LoginForm from "@/components/LoginForm";
+import FileUpload from "@/components/FileUpload";
+
 export default function index() {
   const isRecordingRef = useRef(false);
+
   const {
     allDevices,
     connectedDevice,
@@ -45,6 +58,16 @@ export default function index() {
     setIsModalVisible(true);
   }, [scanForDevices]);
 
+  //#################//
+  const [token, setToken] = useState<string | null>(null);
+
+  const handleLoginSuccess = (token: string) => {
+    setToken(token); // Store token after successful login
+    //console.log("token from App:", token);
+  };
+
+  //#################//
+
   const handleDataStreamingToggle = useCallback(
     async (value: boolean) => {
       if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
@@ -62,6 +85,13 @@ export default function index() {
       <View className="mt-8 flex flex-row gap-x-2 items-center justify-center  ">
         <View>
           <CustomButton title="Connect to GM5" onPress={openModal} />
+
+          {!token ? (
+            <LoginForm onLoginSuccess={handleLoginSuccess} />
+          ) : (
+            /*<DataEntryForm token={token} />*/
+            <FileUpload token={token} />
+          )}
         </View>
       </View>
       <View className="">

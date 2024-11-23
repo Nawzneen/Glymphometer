@@ -21,4 +21,4 @@ expo-env.d.ts
 # @end expo-cli
 
 utils/dataStreaming.ts
-components/ChooseFileNameModal.tsx
+components/ChooseFileNameModal.tsx.env
