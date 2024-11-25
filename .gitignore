@@ -22,3 +22,6 @@ expo-env.d.ts
 
 utils/dataStreaming.ts
 components/ChooseFileNameModal.tsx.env
+
+.env
+utils/backup-bleResponseSubscription.ts

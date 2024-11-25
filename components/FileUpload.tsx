@@ -6,7 +6,7 @@ import {
   uploadDataset,
   uploadFileMetadata,
   uploadFileContent,
-} from "../app/(tabs)/services/apiService";
+} from "../services/apiService";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";

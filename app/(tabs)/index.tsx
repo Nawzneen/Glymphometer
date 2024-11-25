@@ -15,7 +15,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
-import { loginAndGetToken } from "./services/authService";
+import { loginAndGetToken } from "../../services/authService";
 import Constants from "expo-constants";
 import LoginForm from "@/components/LoginForm";
 import FileUpload from "@/components/FileUpload";

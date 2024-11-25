@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { loginAndGetToken } from "../app/(tabs)/services/authService";
+import { loginAndGetToken } from "../services/authService";
 
 export default function LoginForm({
   onLoginSuccess,
