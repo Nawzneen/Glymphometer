@@ -188,14 +188,8 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
         isRecordingRef
       );
     },
-    [
-      connectedDevice,
-      isDataStreaming,
-      dataSubscription,
-      setIsDataStreaming,
-      isRecordingRef,
-    ]
-  ); // the last two were added recently, check the effect
+    [connectedDevice, isDataStreaming, dataSubscription, isRecordingRef]
+  );
   //FUNCTION TO START SCANNING FOR PERIPHERALS
   const scanForPeripherals = () => {
     bleManager.startDeviceScan(
