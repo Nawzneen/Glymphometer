@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
 import { validateData } from "@/utils/validateData";
+import { Alert } from "react-native";
 import {
   FlatList,
   SafeAreaView,
@@ -32,11 +33,9 @@ const SavedFiles = () => {
   const [fileInfo, setFileInfo] = useState<FileInfoType | null | undefined>(
     null
   );
-  useEffect(() => {
-    createFolder();
-  }, []);
   const fetchFiles = useCallback(async () => {
     try {
+      await createFolder(); // if the folder already exist, it will continue to other parts of the code
       const folderUri = FileSystem.documentDirectory + "userData/";
       const fileList = await FileSystem.readDirectoryAsync(folderUri);
       const filesWithInfo = await Promise.all(
@@ -151,7 +150,7 @@ const SavedFiles = () => {
             <TouchableOpacity onPress={() => shareFile(fileUri)}>
               <AntDesign name="sharealt" size={26} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deleteFile(fileUri)}>
+            <TouchableOpacity onPress={() => confirmDelete(fileUri)}>
               <AntDesign name="delete" size={26} color="black" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
@@ -175,6 +174,26 @@ const SavedFiles = () => {
     } finally {
       setRefresh(false);
     }
+  };
+  const confirmDelete = (fileUri: string) => {
+    Alert.alert(
+      "Delete File",
+      "Are you sure you want to delete this file?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteFile(fileUri),
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
   };
 
   return (
