@@ -13,6 +13,7 @@ import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
 import Foundation from "@expo/vector-icons/Foundation";
 import ChooseFileNameModal from "./modals/ChooseFileNameModal";
+import { AppState } from "react-native";
 
 interface RecordProps {
   isDataStreaming: boolean;
@@ -22,6 +23,7 @@ interface RecordProps {
   isRecording: boolean;
   setIsRecording: Dispatch<SetStateAction<boolean>>;
 }
+
 const Record: FC<RecordProps> = ({
   isDataStreaming,
   isRecordingRef,
@@ -33,6 +35,7 @@ const Record: FC<RecordProps> = ({
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
 
   // Handle changes in data streaming or recording
   useEffect(() => {
@@ -51,25 +54,43 @@ const Record: FC<RecordProps> = ({
     //Do not add isRecording to the dependency array
   }, [isDataStreaming]);
 
-  // Handle duration with interval
+  // Handle duration with elapsed time calculation
   useEffect(() => {
     setError("");
     let interval: NodeJS.Timeout | null = null;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setDuration((prev) => prev + 1);
-      }, 1000);
-    } else if (!isRecording && interval) {
-      //Clear the interval when recording stops
-      clearInterval(interval);
-    }
-    // Cleanup function to clear interval if components unmounts
-    return () => {
-      if (interval) {
-        clearInterval(interval);
+
+    const updateDuration = () => {
+      if (startTime) {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - startTime) / 1000);
+        setDuration(elapsedSeconds);
       }
     };
-  }, [isRecording]);
+
+    if (isRecording) {
+      interval = setInterval(updateDuration, 1000);
+      updateDuration(); // Initial call
+
+      // Handle app state changes
+      const subscription = AppState.addEventListener(
+        "change",
+        (nextAppState) => {
+          if (nextAppState === "active") {
+            updateDuration();
+          }
+        }
+      );
+
+      return () => {
+        if (interval) clearInterval(interval);
+        subscription.remove(); // Use remove() from subscription
+      };
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording, startTime]);
 
   //Start recording data
   function startRecordingData() {
@@ -77,6 +98,7 @@ const Record: FC<RecordProps> = ({
       setIsRecordingPaused(false);
       setIsRecording(true);
       isRecordingRef.current = true;
+      setStartTime(Date.now());
       setDuration(0); //Reset the duration when recording starts
     } else {
       setError("Enable data streaming first to start recording");
@@ -88,6 +110,7 @@ const Record: FC<RecordProps> = ({
       setIsRecording(false);
       setIsRecordingPaused(true);
       isRecordingRef.current = false;
+      setStartTime(null); // Clear start time
       setModalVisible(true); // Show modal to save/discard data
     }
   }
