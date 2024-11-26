@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
-import { validateData } from "@/utils/validateData";
+import { postProcessData } from "@/utils/postProcessData";
 import { Alert } from "react-native";
 import {
   FlatList,
@@ -114,7 +114,7 @@ const SavedFiles = () => {
     const formattedSize = formatFileSize(item.size);
 
     const handleFileInfo = async (fileUri: string) => {
-      const info = await validateData(fileUri);
+      const info = await postProcessData(fileUri);
       // console.log("info in validate data ", info);
       if (info) {
         setFileInfo(info);

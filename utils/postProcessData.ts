@@ -119,7 +119,7 @@ const calculatePacketLoss = (
 };
 
 // Main function to validate data
-export const validateData = async (fileUri: string) => {
+export const postProcessData = async (fileUri: string) => {
   const Uint8ArrayData = await readBinaryDataFromFile(fileUri);
   if (!Uint8ArrayData) return;
 
