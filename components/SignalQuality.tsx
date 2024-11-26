@@ -9,16 +9,18 @@ interface SignalQualityProps {
   isLoading: boolean;
   packetNumber?: number;
   isRecordingPaused: boolean;
+  packetLossData: { packetLoss: number; packetLossPercentage: string } | null;
 }
 const SignalQuality: React.FC<SignalQualityProps> = ({
   isDataStreaming,
   onToggleDataStreaming,
   isLoading,
   isRecordingPaused,
+  packetLossData,
 }) => {
   return (
     <>
-      <View className="mt-8 py-10 bg-white flex items-center justify-center  w-[95%] mx-auto shadow-lg">
+      <View className="mt-8 py-10 bg-white flex items-center justify-center  w-[95%] mx-auto shadow-lg rounded-md">
         <View className=" w-[95%] bg-primary-color shadow-lg rounded-lg flex-row items-center justify-between px-5 py-4 mb-2 mx-auto">
           <Text className="flex-1 text-center font-bold text-base text-white">
             {isDataStreaming ? "Pause" : "Start"} Data Streaming
@@ -33,7 +35,7 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
           />
         </View>
         {isDataStreaming ? (
-          <View className="mt-4 flex flex-row justify-between items-center">
+          <View className="mt-4 flex flex-row justify-between items-center gap-x-3 ">
             <View className="flex flex-row justify-center items-center">
               <Text className="text-base text-success-color">
                 Data is being transfered...
@@ -42,7 +44,9 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
                 <PulsingRings />
               </View>
             </View>
-            <View>{/* <Text>{packetNumber}</Text> */}</View>
+            {/* <View className="pt-2"> */}
+            <Text>Loss: {packetLossData?.packetLossPercentage}%</Text>
+            {/* </View> */}
           </View>
         ) : (
           <View className="mt-4 flex flex-row justify-center items-center">

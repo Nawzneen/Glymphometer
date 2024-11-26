@@ -17,6 +17,13 @@ import {
 
 import { addToDataBuffer } from "./dataBuffer";
 
+type PacketStats = {
+  receivedPacketNumbers: Set<number>;
+  duplicatedPackets: number;
+  firstPacketNumber: number | null;
+  lastPacketNumber: number | null;
+};
+
 //FUNCTION TO TOGGLE DATA STREAMING, SPECIFIC TO GM5
 // S starts the data streaming, P pauses the data streaming
 export const toggleDataStreaming =
@@ -27,7 +34,8 @@ export const toggleDataStreaming =
     isDataStreaming: boolean,
     setIsDataStreaming: Dispatch<SetStateAction<boolean>>,
     dataSubscription: MutableRefObject<Subscription | null>,
-    isRecordingRef: MutableRefObject<boolean>
+    isRecordingRef: MutableRefObject<boolean>,
+    packetStats: PacketStats
   ): Promise<void> => {
     console.log("toogle data", command);
     const status = command === "S" ? "Start" : "Pause";
@@ -71,7 +79,8 @@ export const toggleDataStreaming =
           connectedDevice,
           dataSubscription,
           isRecordingRef,
-          setIsDataStreaming
+          setIsDataStreaming,
+          packetStats
         ); // Start data streaming
       } else if (command === "P") {
         // Stop data streaming and remove listener
@@ -101,7 +110,8 @@ export const startDataStreaming = (
   connectedDevice: Device,
   dataSubscription: MutableRefObject<Subscription | null>,
   isRecordingRef: MutableRefObject<boolean>,
-  setIsDataStreaming: Dispatch<SetStateAction<boolean>>
+  setIsDataStreaming: Dispatch<SetStateAction<boolean>>,
+  packetStats: PacketStats
 ): void => {
   if (connectedDevice) {
     console.log("data streaming started");
@@ -123,7 +133,12 @@ export const startDataStreaming = (
           connectedDevice.monitorCharacteristicForService(
             DATA_SERVICE_UUID,
             TX_CHARACTERISTIC_UUID,
-            onDataUpdate(dataSubscription, setIsDataStreaming, isRecordingRef) //callback function to handle the data
+            onDataUpdate(
+              dataSubscription,
+              setIsDataStreaming,
+              isRecordingRef,
+              packetStats
+            ) //callback function to handle the data
           );
       })
       .catch((error) => {
@@ -138,7 +153,8 @@ export const onDataUpdate =
   (
     dataSubscription: MutableRefObject<Subscription | null>,
     setIsDataStreaming: Dispatch<SetStateAction<boolean>>,
-    isRecordingRef: MutableRefObject<boolean>
+    isRecordingRef: MutableRefObject<boolean>,
+    packetStats: PacketStats
   ) =>
   (error: BleError | null, characteristic: Characteristic | null): void => {
     // console.log("on Data update is supposed to run");
@@ -167,21 +183,16 @@ export const onDataUpdate =
         // Decode the Base64 string to a byte array
         const decodedData = base64.decode(encodedData);
 
-        // const byteArray = [];
-        // for (let i = 0; i < decodedData.length; i++) {
-        //   byteArray.push(decodedData.charCodeAt(i));
-        // }
         const byteArray = Array.from(decodedData, (char) => char.charCodeAt(0));
 
         // this is decimal values of each paceket [83,83,...,69,69]
-        // console.log("byteArray", byteArray);
-        // console.log("isRecordingRef", isRecordingRef.current);
+
+        // Process the packet (now only for for packet loss)
+        processPacket(byteArray, packetStats);
+
         if (isRecordingRef.current) {
           addToDataBuffer(byteArray); // Accumulate binary data
-          // console.log("data is being recorded");
         }
-
-        // console.log("data is streaming");
       } else {
         console.error("Characteristic value is null or undefined.");
       }
@@ -191,3 +202,45 @@ export const onDataUpdate =
     }
   };
 ////
+const START_MARKER = 83; // 'S' in ASCII
+const END_MARKER = 69; // 'E' in ASCII
+
+const validatePacketMarkers = (packet: number[]): boolean => {
+  return (
+    packet[0] === START_MARKER &&
+    packet[1] === START_MARKER &&
+    packet[507] === END_MARKER &&
+    packet[508] === END_MARKER
+  );
+};
+
+const extractPacketNumber = (packet: number[]): number => {
+  return (packet[505] << 8) | packet[506];
+};
+
+const processPacket = (packet: number[], packetStats: PacketStats): void => {
+  // Validate packet markers
+  if (!validatePacketMarkers(packet)) {
+    console.warn("Invalid packet markers.");
+    return;
+  }
+
+  // Extract packet number
+  const packetNumber = extractPacketNumber(packet);
+  // Initialize first packet number
+  if (packetStats.firstPacketNumber === null) {
+    packetStats.firstPacketNumber = packetNumber;
+    console.log("first packet number is", packetNumber);
+  }
+
+  // Update last packet number
+  packetStats.lastPacketNumber = packetNumber;
+  console.log("last packet number is", packetNumber);
+
+  // Check for duplicates
+  if (packetStats.receivedPacketNumbers.has(packetNumber)) {
+    packetStats.duplicatedPackets += 1;
+  } else {
+    packetStats.receivedPacketNumbers.add(packetNumber);
+  }
+};

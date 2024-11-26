@@ -21,7 +21,7 @@ export default function index() {
     requestPermissions,
     scanForPeripherals,
     isDataStreaming,
-    // packetNumber,
+    packetLossData,
   } = useBLE(isRecordingRef);
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -89,23 +89,20 @@ export default function index() {
                 <AntDesign name="disconnect" size={24} color="black" />
               </TouchableOpacity>
             </View>
-            <AdjustLEDLevel
-              handleLEDLevel={handleLEDLevel}
-              isDataStreaming={isDataStreaming}
-              isRecording={isRecording}
-            />
+
             <SignalQuality
               isDataStreaming={isDataStreaming}
               onToggleDataStreaming={handleDataStreamingToggle}
               isLoading={isLoading}
               isRecordingPaused={isRecordingPaused}
+              packetLossData={packetLossData}
+            />
+            <AdjustLEDLevel
+              handleLEDLevel={handleLEDLevel}
+              isDataStreaming={isDataStreaming}
+              isRecording={isRecording}
             />
 
-            {/* {packet && (
-              <Text className="px-1 text-secondary-text-color">
-                GMeter Data streaming : {packet}
-              </Text>
-            )} */}
             <Record
               isDataStreaming={isDataStreaming}
               isRecordingRef={isRecordingRef}

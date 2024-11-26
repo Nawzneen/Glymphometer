@@ -16,6 +16,13 @@ if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
 }
 
+type PacketStats = {
+  receivedPacketNumbers: Set<number>;
+  duplicatedPackets: number;
+  firstPacketNumber: number | null;
+  lastPacketNumber: number | null;
+};
+
 function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   // const [packet, setPacket] = useState<string>(""); //Track the received data packet
@@ -24,6 +31,106 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   // Initialization and BLE State Listener
   const dataSubscription = useRef<Subscription | null>(null); //Initialize data subscription ref
   // const [packetNumber, setPacketNumber] = useState<number>(0); //Track the packet number
+
+  // Initialize packetStats
+  const packetStatsRef = useRef<PacketStats>({
+    firstPacketNumber: null,
+    lastPacketNumber: null,
+    receivedPacketNumbers: new Set<number>(),
+    duplicatedPackets: 0,
+  });
+  // State to hold paccket loss data
+  const [packetLossData, setPacketLossData] = useState<{
+    packetLoss: number;
+    packetLossPercentage: string;
+  } | null>(null);
+
+  // Timer ReferenceError
+  const packetLossTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const calculatePacketLoss = () => {
+    const packetStats = packetStatsRef.current;
+    console.log("packetStats", packetStats);
+    if (
+      packetStats.firstPacketNumber !== null &&
+      packetStats.lastPacketNumber !== null &&
+      packetStats.receivedPacketNumbers.size > 0
+    ) {
+      const expectedPackets = calculateExpectedPackets(
+        packetStats.firstPacketNumber,
+        packetStats.lastPacketNumber
+      );
+      const receivedPackets = packetStats.receivedPacketNumbers.size;
+      const packetLoss = expectedPackets - receivedPackets;
+      const packetLossPercentage = (
+        (packetLoss / expectedPackets) *
+        100
+      ).toFixed(2);
+      console.log("Packet Loss:", packetLoss, packetLossPercentage);
+      // Update State
+      setPacketLossData({ packetLoss, packetLossPercentage });
+      //Reset oacjet stats for the next interval
+      console.log("reseting the packets for the next interval");
+      // packetStatsRef.current = {
+      //   firstPacketNumber: null,
+      //   lastPacketNumber: null,
+      //   receivedPacketNumbers: new Set<number>(),
+      //   duplicatedPackets: 0,
+      // };
+      // Reset properties without changing the object reference
+      packetStatsRef.current.firstPacketNumber = null;
+      packetStatsRef.current.lastPacketNumber = null;
+      packetStatsRef.current.receivedPacketNumbers.clear(); // Clear the Set
+      packetStatsRef.current.duplicatedPackets = 0;
+    } else {
+      // No data to calculate packet Loss
+      console.log("No data to calculate packet loss");
+      setPacketLossData(null);
+    }
+  };
+  const calculateExpectedPackets = (
+    firstPacketNumber: number,
+    lastPacketNumber: number
+  ): number => {
+    if (lastPacketNumber >= firstPacketNumber) {
+      return lastPacketNumber - firstPacketNumber + 1;
+    } else {
+      //Wrap around accurred
+      return 65536 - firstPacketNumber + lastPacketNumber + 1;
+    }
+  };
+
+  useEffect(() => {
+    if (isDataStreaming) {
+      // Start the packet loss timer
+      packetLossTimerRef.current = setInterval(() => {
+        console.log("5 second passed");
+        calculatePacketLoss();
+      }, 10000); // 10 seconds
+    } else {
+      // Stop the packet loss timer
+      console.log("Data Streaming is off, Clearing packet loss timer");
+      if (packetLossTimerRef.current) {
+        clearInterval(packetLossTimerRef.current);
+        packetLossTimerRef.current = null;
+      }
+      //Reset packet stats
+      packetStatsRef.current = {
+        firstPacketNumber: null,
+        lastPacketNumber: null,
+        receivedPacketNumbers: new Set<number>(),
+        duplicatedPackets: 0,
+      };
+      setPacketLossData(null);
+    }
+    return () => {
+      //clean up when component unmounts
+      if (packetLossTimerRef.current) {
+        clearInterval(packetLossTimerRef.current);
+        packetLossTimerRef.current = null;
+      }
+    };
+  }, [isDataStreaming]);
 
   useEffect(() => {
     return () => {
@@ -185,7 +292,8 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
         isDataStreaming,
         setIsDataStreaming,
         dataSubscription,
-        isRecordingRef
+        isRecordingRef,
+        packetStatsRef.current
       );
     },
     [connectedDevice, isDataStreaming, dataSubscription, isRecordingRef]
@@ -233,7 +341,10 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     startDataStreaming, // Function to start data streaming for GM5
     isDataStreaming, // Data streaming status
     setIsDataStreaming, // Set data streaming status
+    packetLossData, // Packet loss LIVE data
   };
 }
 
 export default useBLE;
+
+////
