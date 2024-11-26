@@ -20,8 +20,8 @@ const AdjustLEDLevel: FC<AdjustLEDLevelProps> = ({
     handleLEDLevel(LEDLevel);
   }, [LEDLevel]);
   return (
-    <View className="mt-8 mx-2 bg-white p-4">
-      <Text className="mb-4  text-base text-primary-text-color ">
+    <View className="mt-4 mx-2 bg-gray-100 p-4 ">
+      <Text className="mb-4 px-2 text-base text-primary-text-color ">
         Adjust the light level: {LEDLevel}
       </Text>
       <Slider
@@ -31,9 +31,9 @@ const AdjustLEDLevel: FC<AdjustLEDLevelProps> = ({
         value={LEDLevel}
         disabled={!isDataStreaming || isRecording}
         onValueChange={(LEDLevel) => setLEDLevel(LEDLevel)}
-        minimumTrackTintColor="#1fb28a"
-        maximumTrackTintColor="#d3d3d3"
-        thumbTintColor="#b9e4c9"
+        minimumTrackTintColor="#2d9cdb"
+        maximumTrackTintColor="#56ccf2"
+        thumbTintColor="#2d9cdb"
       />
       {/* <View className="flex flex-row">
         {steps.map((step) => (

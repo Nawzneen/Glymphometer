@@ -140,7 +140,7 @@ const Record: FC<RecordProps> = ({
     }
   };
   return (
-    <View className="flex  justify-center items-center bg-white mt-4 py-4">
+    <View className="flex justify-center items-center bg-white mt-4 py-4 w-[95%] mx-auto rounded-md ">
       {isRecordingPaused ? (
         <View>
           <Text className="text-base text-primary-text-color">
