@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master, Login_uplodFiles]
   pull_request:
-    branches: [master, develop]
+    branches: [master, Login_uplodFiles]
 
 jobs:
   build-and-test:
@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version: "18"
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -29,7 +29,7 @@ jobs:
       # Step 4: Run ESLint
       - name: Run ESLint
         run: |
-          npx eslint . --ext .js,.jsx,.ts,.tsx
+          npx eslint .
 
       # Step 5: Run Jest tests
       - name: Run Jest tests
