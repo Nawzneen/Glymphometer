@@ -22,3 +22,6 @@ expo-env.d.ts
 
 utils/backup-bleResponseSubscription.ts
 .env
+actions-runner/
+useBLE.test.ts
+__mocks__/
