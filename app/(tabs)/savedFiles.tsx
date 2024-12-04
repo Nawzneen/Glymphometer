@@ -3,6 +3,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
+import { postProcessData } from "@/utils/postProcessData";
+import { Alert } from "react-native";
 import {
   FlatList,
   SafeAreaView,
@@ -14,6 +16,8 @@ import { createFolder } from "@/utils/saveData";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
+import FileInfoModal from "@/components/modals/FileInfoModal";
+import { FileInfoType } from "@/types/globalTypes";
 
 const SavedFiles = () => {
   const [files, setFiles] = useState<
@@ -25,17 +29,20 @@ const SavedFiles = () => {
     }>
   >([]);
   const [refresh, setRefresh] = useState<boolean>(false);
-  useEffect(() => {
-    createFolder();
-  }, []);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [fileInfo, setFileInfo] = useState<FileInfoType | null | undefined>(
+    null
+  );
   const fetchFiles = useCallback(async () => {
     try {
+      await createFolder(); // if the folder already exist, it will continue to other parts of the code
       const folderUri = FileSystem.documentDirectory + "userData/";
       const fileList = await FileSystem.readDirectoryAsync(folderUri);
       const filesWithInfo = await Promise.all(
         fileList.map(async (fileName) => {
           const fileUri = folderUri + fileName;
           const fileInfo = await FileSystem.getInfoAsync(fileUri);
+
           if (fileInfo.exists) {
             return {
               name: fileName,
@@ -106,6 +113,16 @@ const SavedFiles = () => {
     const formattedDate = formatDate(item.modificationTime);
     const formattedSize = formatFileSize(item.size);
 
+    const handleFileInfo = async (fileUri: string) => {
+      const info = await postProcessData(fileUri);
+      // console.log("info in validate data ", info);
+      if (info) {
+        setFileInfo(info);
+        setIsModalVisible(true);
+      } else {
+        console.log("failed to validate data");
+      }
+    };
     return (
       <View className="mb-4 py-3 px-3 gap-x-1 rounded-lg flex flex-col justify-between bg-gray-200">
         <View className="flex flex-row justify-between items-center">
@@ -131,10 +148,13 @@ const SavedFiles = () => {
             gap-x-3"
           >
             <TouchableOpacity onPress={() => shareFile(fileUri)}>
-              <AntDesign name="sharealt" size={24} color="black" />
+              <AntDesign name="sharealt" size={26} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => deleteFile(fileUri)}>
-              <AntDesign name="delete" size={24} color="black" />
+            <TouchableOpacity onPress={() => confirmDelete(fileUri)}>
+              <AntDesign name="delete" size={26} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
+              <AntDesign name="infocirlceo" size={26} color="black" />
             </TouchableOpacity>
           </View>
         </View>
@@ -151,7 +171,29 @@ const SavedFiles = () => {
     } catch (error) {
       handleError(error, "Error deleting file");
       console.error("Error deleting file", error);
+    } finally {
+      setRefresh(false);
     }
+  };
+  const confirmDelete = (fileUri: string) => {
+    Alert.alert(
+      "Delete File",
+      "Are you sure you want to delete this file?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteFile(fileUri),
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
   };
 
   return (
@@ -182,6 +224,11 @@ const SavedFiles = () => {
         )}
       </View>
       <Toast />
+      <FileInfoModal
+        isModalVisible={isModalVisible}
+        setIsModalVisible={setIsModalVisible}
+        info={fileInfo}
+      />
     </SafeAreaView>
   );
 };

@@ -1,26 +1,43 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  FC,
+  MutableRefObject,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { saveDataToFile } from "@/utils/saveData";
+import Foundation from "@expo/vector-icons/Foundation";
+import ChooseFileNameModal from "./modals/ChooseFileNameModal";
+import { AppState } from "react-native";
 
 interface RecordProps {
   isDataStreaming: boolean;
-  isRecordingRef: React.MutableRefObject<boolean>;
+  isRecordingRef: MutableRefObject<boolean>;
   isRecordingPaused: boolean;
-  setIsRecordingPaused: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsRecordingPaused: Dispatch<SetStateAction<boolean>>;
+  isRecording: boolean;
+  setIsRecording: Dispatch<SetStateAction<boolean>>;
 }
-const Record: React.FC<RecordProps> = ({
+
+const Record: FC<RecordProps> = ({
   isDataStreaming,
   isRecordingRef,
+  isRecording,
+  setIsRecording,
   isRecordingPaused,
   setIsRecordingPaused,
 }) => {
-  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
-  // Update the ref whenever isRecording changes
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
 
+  // Handle changes in data streaming or recording
   useEffect(() => {
     setError("");
     if (!isDataStreaming && isRecording) {
@@ -36,57 +53,94 @@ const Record: React.FC<RecordProps> = ({
     }
     //Do not add isRecording to the dependency array
   }, [isDataStreaming]);
+
+  // Handle duration with elapsed time calculation
   useEffect(() => {
     setError("");
     let interval: NodeJS.Timeout | null = null;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setDuration((prev) => prev + 1);
-      }, 1000);
-    } else if (!isRecording && interval) {
-      //Clear the interval when recording stops
-      clearInterval(interval);
-    }
-    // Cleanup function to clear interval if components unmounts
-    return () => {
-      if (interval) {
-        clearInterval(interval);
+
+    const updateDuration = () => {
+      if (startTime) {
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - startTime) / 1000);
+        setDuration(elapsedSeconds);
       }
     };
-  }, [isRecording]);
+
+    if (isRecording) {
+      interval = setInterval(updateDuration, 1000);
+      updateDuration(); // Initial call
+
+      // Handle app state changes
+      const subscription = AppState.addEventListener(
+        "change",
+        (nextAppState) => {
+          if (nextAppState === "active") {
+            updateDuration();
+          }
+        }
+      );
+
+      return () => {
+        if (interval) clearInterval(interval);
+        subscription.remove(); // Use remove() from subscription
+      };
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording, startTime]);
+
+  //Start recording data
   function startRecordingData() {
     if (isDataStreaming) {
       setIsRecordingPaused(false);
       setIsRecording(true);
       isRecordingRef.current = true;
+      setStartTime(Date.now());
       setDuration(0); //Reset the duration when recording starts
     } else {
       setError("Enable data streaming first to start recording");
     }
   }
+  //Stop recording data
   function stopRecordingData() {
     if (isRecording) {
       setIsRecording(false);
       setIsRecordingPaused(true);
       isRecordingRef.current = false;
+      setStartTime(null); // Clear start time
+      setModalVisible(true); // Show modal to save/discard data
     }
   }
+  // Discard Data
   function discardData() {
     setIsRecording(false);
     setIsRecordingPaused(false);
     setDuration(0);
     clearDataBuffer();
+    setModalVisible(false);
   }
-  async function handleSaveData() {
-    const dataBuffer = getDataBuffer();
-    await saveDataToFile(dataBuffer);
-    setIsRecordingPaused(false);
-    setIsRecording(false);
-    setDuration(0);
-    clearDataBuffer();
-  }
+
+  // Save Data
+
+  const handleSaveData = async (fileName: string) => {
+    try {
+      const dataBuffer = getDataBuffer();
+      await saveDataToFile(dataBuffer, fileName);
+      setIsRecordingPaused(false);
+      setIsRecording(false);
+      setDuration(0);
+      clearDataBuffer();
+      setModalVisible(false);
+    } catch (error) {
+      // handleError(error, "Error saving data");
+      setError("Error saving data to file");
+    }
+  };
   return (
-    <View className="flex  justify-center items-center bg-white mt-4 py-4">
+    <View className="flex justify-center items-center bg-white mt-4 py-4 w-[95%] mx-auto rounded-md ">
       {isRecordingPaused ? (
         <View>
           <Text className="text-base text-primary-text-color">
@@ -96,7 +150,10 @@ const Record: React.FC<RecordProps> = ({
             <TouchableOpacity className="" onPress={discardData}>
               <Ionicons name="close-circle" size={60} color={"black"} />
             </TouchableOpacity>
-            <TouchableOpacity className="" onPress={handleSaveData}>
+            <TouchableOpacity
+              className=""
+              onPress={() => setModalVisible(true)}
+            >
               <Ionicons name="checkmark-circle" size={60} color={"black"} />
             </TouchableOpacity>
           </View>
@@ -109,11 +166,13 @@ const Record: React.FC<RecordProps> = ({
           <View className="flex flex-row  justify-center items-center gap-x-3 mt-2">
             {isRecording ? (
               <TouchableOpacity>
-                <Ionicons name="play-circle" size={60} color={"red"} />
+                <Foundation name="record" size={68} color="red" />
+                {/* <Ionicons name="play-circle" size={68} color={"red"} /> */}
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={startRecordingData}>
-                <Ionicons name="play-circle" size={60} color={"black"} />
+                <Foundation name="record" size={68} color="black" />
+                {/* <Ionicons name="play-circle" size={60} color={"black"} /> */}
               </TouchableOpacity>
             )}
             {isRecordingPaused ? (
@@ -137,7 +196,14 @@ const Record: React.FC<RecordProps> = ({
           </Text>
         </Text>
       </View>
-      <Text className="text-red-500 mt-2">{error}</Text>
+      {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
+
+      {/* Modal for choosing file name */}
+      <ChooseFileNameModal
+        visible={modalVisible}
+        onSave={handleSaveData}
+        onDiscard={discardData}
+      />
     </View>
   );
 };

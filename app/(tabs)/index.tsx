@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "../../components/CustomButton";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-  Button,
-  FlatList,
-} from "react-native";
-import DeviceModal from "../../components/DeviceConnectionModal";
+import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import DeviceModal from "../../components/modals/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
+import AdjustLEDLevel from "@/components/AdjustLEDLevel";
 import { loginAndGetToken } from "../../services/authService";
 import Constants from "expo-constants";
 import LoginForm from "@/components/LoginForm";
@@ -28,13 +22,14 @@ export default function index() {
     connectedDevice,
     handleConnectToDevice,
     handleDisconnectDevice,
-    toggleDataStreaming,
+    handleToggleDataStreaming,
+    handleLEDLevel,
     requestPermissions,
     scanForPeripherals,
     isDataStreaming,
-    // packetNumber,
+    packetLossData,
   } = useBLE(isRecordingRef);
-
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
   const [isRecordingPaused, setIsRecordingPaused] = useState<boolean>(false); // User paused the data streaming and need to decide what to do with saved data
@@ -73,16 +68,16 @@ export default function index() {
       if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
       setIsLoading(true);
       if (connectedDevice) {
-        await toggleDataStreaming(connectedDevice, value ? "S" : "P");
+        await handleToggleDataStreaming(value ? "S" : "P");
       }
       setIsLoading(false);
     },
-    [isLoading, connectedDevice, toggleDataStreaming, isRecordingPaused]
+    [isLoading, connectedDevice, handleToggleDataStreaming, isRecordingPaused]
   );
 
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
-      <View className="mt-8 flex flex-row gap-x-2 items-center justify-center  ">
+      <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
         <View>
           <CustomButton title="Connect to GM5" onPress={openModal} />
 
@@ -97,7 +92,7 @@ export default function index() {
       <View className="">
         {connectedDevice ? (
           <>
-            <View className="mt-16 flex-row flex gap-x-1 justify-center items-center">
+            <View className="mt-8 flex-row flex gap-x-1 justify-center items-center">
               <Text className="text-xl font-bold text-primary-color">
                 {connectedDevice.name} is{" "}
                 {connectedDevice ? "Connected" : "Disconnected"}
@@ -123,18 +118,21 @@ export default function index() {
               onToggleDataStreaming={handleDataStreamingToggle}
               isLoading={isLoading}
               isRecordingPaused={isRecordingPaused}
+              packetLossData={packetLossData}
+            />
+            <AdjustLEDLevel
+              handleLEDLevel={handleLEDLevel}
+              isDataStreaming={isDataStreaming}
+              isRecording={isRecording}
             />
 
-            {/* {packet && (
-              <Text className="px-1 text-secondary-text-color">
-                GMeter Data streaming : {packet}
-              </Text>
-            )} */}
             <Record
               isDataStreaming={isDataStreaming}
               isRecordingRef={isRecordingRef}
               isRecordingPaused={isRecordingPaused}
               setIsRecordingPaused={setIsRecordingPaused}
+              isRecording={isRecording}
+              setIsRecording={setIsRecording}
             />
           </>
         ) : (

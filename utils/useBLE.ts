@@ -3,27 +3,25 @@ import Toast from "react-native-toast-message";
 import { requestPermissions } from "./requestPermissions";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "./bleConnection";
-import base64 from "react-native-base64";
 import { clearDataBuffer } from "@/utils/dataBuffer";
-
-import {
-  BleError,
-  Device,
-  Characteristic,
-  Subscription,
-  BleErrorCode,
-} from "react-native-ble-plx";
-import { addToDataBuffer } from "./dataBuffer";
+import { DATA_SERVICE_UUID } from "./bleConstants";
+import { adjustLEDLevel } from "./bleAdjustLEDLevel";
+import { BleError, Device, Subscription } from "react-native-ble-plx";
+import { toggleDataStreaming, startDataStreaming } from "./bleDataStreaming";
 import bleManager from "./bleManager";
 import { Alert } from "react-native";
 import { Buffer } from "buffer";
+
 if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
 }
-// Device Characteristitcs UUIDs specific to GM5
-const DATA_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Service UUID for handling data
-const RX_CHARACTERISTIC_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //To Send Data / write
-const TX_CHARACTERISTIC_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // To Recieve UUID / notify
+
+type PacketStats = {
+  receivedPacketNumbers: Set<number>;
+  duplicatedPackets: number;
+  firstPacketNumber: number | null;
+  lastPacketNumber: number | null;
+};
 
 function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
@@ -33,6 +31,106 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   // Initialization and BLE State Listener
   const dataSubscription = useRef<Subscription | null>(null); //Initialize data subscription ref
   // const [packetNumber, setPacketNumber] = useState<number>(0); //Track the packet number
+
+  // Initialize packetStats
+  const packetStatsRef = useRef<PacketStats>({
+    firstPacketNumber: null,
+    lastPacketNumber: null,
+    receivedPacketNumbers: new Set<number>(),
+    duplicatedPackets: 0,
+  });
+  // State to hold paccket loss data
+  const [packetLossData, setPacketLossData] = useState<{
+    packetLoss: number;
+    packetLossPercentage: string;
+  } | null>(null);
+
+  // Timer ReferenceError
+  const packetLossTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const calculatePacketLoss = () => {
+    const packetStats = packetStatsRef.current;
+    console.log("packetStats", packetStats);
+    if (
+      packetStats.firstPacketNumber !== null &&
+      packetStats.lastPacketNumber !== null &&
+      packetStats.receivedPacketNumbers.size > 0
+    ) {
+      const expectedPackets = calculateExpectedPackets(
+        packetStats.firstPacketNumber,
+        packetStats.lastPacketNumber
+      );
+      const receivedPackets = packetStats.receivedPacketNumbers.size;
+      const packetLoss = expectedPackets - receivedPackets;
+      const packetLossPercentage = (
+        (packetLoss / expectedPackets) *
+        100
+      ).toFixed(2);
+      console.log("Packet Loss:", packetLoss, packetLossPercentage);
+      // Update State
+      setPacketLossData({ packetLoss, packetLossPercentage });
+      //Reset oacjet stats for the next interval
+      console.log("reseting the packets for the next interval");
+      // packetStatsRef.current = {
+      //   firstPacketNumber: null,
+      //   lastPacketNumber: null,
+      //   receivedPacketNumbers: new Set<number>(),
+      //   duplicatedPackets: 0,
+      // };
+      // Reset properties without changing the object reference
+      packetStatsRef.current.firstPacketNumber = null;
+      packetStatsRef.current.lastPacketNumber = null;
+      packetStatsRef.current.receivedPacketNumbers.clear(); // Clear the Set
+      packetStatsRef.current.duplicatedPackets = 0;
+    } else {
+      // No data to calculate packet Loss
+      console.log("No data to calculate packet loss");
+      setPacketLossData(null);
+    }
+  };
+  const calculateExpectedPackets = (
+    firstPacketNumber: number,
+    lastPacketNumber: number
+  ): number => {
+    if (lastPacketNumber >= firstPacketNumber) {
+      return lastPacketNumber - firstPacketNumber + 1;
+    } else {
+      //Wrap around accurred
+      return 65536 - firstPacketNumber + lastPacketNumber + 1;
+    }
+  };
+
+  useEffect(() => {
+    if (isDataStreaming) {
+      // Start the packet loss timer
+      packetLossTimerRef.current = setInterval(() => {
+        console.log("5 second passed");
+        calculatePacketLoss();
+      }, 10000); // 10 seconds
+    } else {
+      // Stop the packet loss timer
+      console.log("Data Streaming is off, Clearing packet loss timer");
+      if (packetLossTimerRef.current) {
+        clearInterval(packetLossTimerRef.current);
+        packetLossTimerRef.current = null;
+      }
+      //Reset packet stats
+      packetStatsRef.current = {
+        firstPacketNumber: null,
+        lastPacketNumber: null,
+        receivedPacketNumbers: new Set<number>(),
+        duplicatedPackets: 0,
+      };
+      setPacketLossData(null);
+    }
+    return () => {
+      //clean up when component unmounts
+      if (packetLossTimerRef.current) {
+        clearInterval(packetLossTimerRef.current);
+        packetLossTimerRef.current = null;
+      }
+    };
+  }, [isDataStreaming]);
 
   useEffect(() => {
     return () => {
@@ -52,7 +150,6 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     if (connectedDevice) {
       disconnectSubscription = connectedDevice.onDisconnected(
         (error, device) => {
-          // console.log("Device disconnected", device.id);
           if (dataSubscription.current) {
             console.log(
               "removing data subscription",
@@ -107,7 +204,6 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     const fetchConnectedDevices = async () => {
       try {
         const devices = await bleManager.connectedDevices([DATA_SERVICE_UUID]);
-        console.log("Connected devicess:", devices);
         if (devices.length > 0) {
           setConnectedDevice(devices[0]);
           const newDevice = devices[0];
@@ -129,18 +225,79 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
 
   // Function to connect to a BLE device
   const handleConnectToDevice = async (device: Device) => {
-    clearDataBuffer(); // Clear the data buffer before disconnecting to any device
-    await connectToDevice(connectedDevice, device, setConnectedDevice);
+    clearDataBuffer(); // Clear the data buffer before connecting or disconnecting to any device
+    if (connectedDevice) {
+      await handleDisconnectDevice();
+    }
+    try {
+      const deviceConnection = await connectToDevice(device);
+      setConnectedDevice(deviceConnection);
+      Toast.show({
+        type: "success",
+        text1: "Device Connected successfully",
+        text2: `Device Connected successfully:  ${deviceConnection?.name}`,
+        position: "top",
+      });
+    } catch (error) {
+      handleError(error, "Error connecting to device");
+    }
   };
   // Function to disconnect from a BLE device
   const handleDisconnectDevice = async () => {
     if (connectedDevice) {
-      console.log("pause data streaming when disconnecting");
-      await toggleDataStreaming(connectedDevice, "P");
+      console.log("pause data streaming before disconnecting");
+      await handleToggleDataStreaming("P");
+      await disconnectDevice(connectedDevice);
+      setConnectedDevice(null);
+      Toast.show({
+        type: "success",
+        text1: "Disconnected",
+        text2: `Disconnected from ${
+          connectedDevice.name || connectedDevice.id
+        }`,
+        position: "top",
+      });
+    } else {
+      Toast.show({
+        type: "info",
+        text1: "No Device Connected",
+        text2: "There is no device currently connected.",
+        position: "bottom",
+      });
     }
-    await disconnectDevice(connectedDevice, setConnectedDevice);
   };
 
+  //FUNCTION TO ADJUST LED LIGHT LEVEL
+  //** This function should only work if the isDataStreaming true. */
+  const handleLEDLevel = async (value: number) => {
+    if (!isDataStreaming) {
+      handleError(
+        "Data streaming is should be active for this function to work"
+      );
+      return;
+    }
+    if (connectedDevice) {
+      const LEDLevel = value.toString();
+      await adjustLEDLevel(LEDLevel, connectedDevice);
+    } else {
+      console.log("No device connected");
+    }
+  };
+
+  const handleToggleDataStreaming = useCallback(
+    async (command: string) => {
+      await toggleDataStreaming(
+        connectedDevice,
+        command,
+        isDataStreaming,
+        setIsDataStreaming,
+        dataSubscription,
+        isRecordingRef,
+        packetStatsRef.current
+      );
+    },
+    [connectedDevice, isDataStreaming, dataSubscription, isRecordingRef]
+  );
   //FUNCTION TO START SCANNING FOR PERIPHERALS
   const scanForPeripherals = () => {
     bleManager.startDeviceScan(
@@ -171,159 +328,6 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
       }
     );
   };
-  ////
-
-  //FUNCTION TO TOGGLE DATA STREAMING, SPECIFIC TO GM5
-  // S starts the data streaming, P pauses the data streaming
-  const toggleDataStreaming = useCallback(
-    async (device: Device, command: string) => {
-      console.log("toogle data", command);
-      const status = command === "S" ? "Start" : "Pause";
-      if (!device) {
-        Toast.show({
-          type: "error",
-          text1: "No Device is Connected.",
-          text2: "No Device is Connected.",
-          position: "top", // Consistent position
-        });
-        return;
-      }
-
-      // Prevent duplicate actions/toggles
-      if (
-        (command === "S" && isDataStreaming) ||
-        (command === "P" && !isDataStreaming)
-      ) {
-        Toast.show({
-          type: "error",
-          text1: `Data Streaming Already ${
-            command === "S" ? "Started" : "Paused"
-          }`,
-          text2: `Cannot ${
-            command === "S" ? "start" : "pause"
-          } again without toggling.`,
-          position: "bottom",
-        });
-        return;
-      }
-      //Encode the command string to base64
-      const base64Command = base64.encode(command);
-      try {
-        await device.writeCharacteristicWithResponseForService(
-          DATA_SERVICE_UUID,
-          RX_CHARACTERISTIC_UUID,
-          base64Command
-        );
-        if (command === "S") {
-          dataStreaming(device); // Start data streaming
-        } else if (command === "P") {
-          // Stop data streaming and remove listener
-          if (dataSubscription.current) {
-            console.log("datasubsccription removed when paused");
-            dataSubscription.current.remove();
-            dataSubscription.current = null;
-          }
-        }
-        setIsDataStreaming(command === "S"); //set true if command is S, set false if command is p
-        Toast.show({
-          type: "success",
-          text1: `Data Streaming ${status}ed`,
-          text2: `Data streaming has been ${status.toLowerCase()}ed.`,
-          position: "top",
-        });
-      } catch (error: unknown) {
-        handleError(error, `Error ${status}ing data streaming`);
-        // setIsDataStreaming(command === "P");
-      }
-    },
-    [connectedDevice, isDataStreaming, dataSubscription]
-  );
-
-  // FUNCTION FOR DATA STREAMING
-  const dataStreaming = (
-    device: Device
-    // setReceivedData?: (data: string) => void
-  ) => {
-    if (device) {
-      console.log("data streaming started");
-      //set the mut to 512 to contain the 509 bytes data from GM5  (the default mut size is 23 bytes, showing only 20bytes of the data)
-      device
-        .requestMTU(512)
-        .then((mtu) => {
-          // Before setting up a new listener, remove any existing one
-          if (dataSubscription.current) {
-            console.log(
-              "data subscription remove before setting up new datasubscription in datastreaming"
-            );
-            dataSubscription.current.remove();
-            dataSubscription.current = null;
-          }
-          console.log("setting up data subscription");
-          // Set up the listener and store the subscription
-          dataSubscription.current = device.monitorCharacteristicForService(
-            DATA_SERVICE_UUID,
-            TX_CHARACTERISTIC_UUID,
-            onDataUpdate //callback function to handle the data
-          );
-        })
-        .catch((error) => {
-          console.log("MTU negotation failed", error);
-        });
-    }
-  };
-
-  //CALL BACK FUNCTION TO HANDLE THE RECEIVED DATA
-  const onDataUpdate =
-    // (setReceivedData?: (data: string) => void) =>
-    (error: BleError | null, characteristic: Characteristic | null) => {
-      // console.log("on Data update is supposed to run");
-      try {
-        if (error) {
-          console.log("Error onDataUpdate", error);
-          // If the error indicates the device is disconnected, remove the subscription
-          console.log("Error Code:", error.errorCode);
-          console.log(BleErrorCode.DeviceDisconnected);
-          if (error.errorCode === BleErrorCode.DeviceDisconnected) {
-            if (dataSubscription.current) {
-              dataSubscription.current.remove();
-              dataSubscription.current = null;
-              console.log(
-                "Data subscription removed in onDataUpdate when device disconnected"
-              );
-            }
-            setIsDataStreaming(false);
-          }
-          return;
-        }
-
-        if (characteristic && characteristic.value) {
-          //characteristic.value is a base64 encoded string
-          const encodedData = characteristic.value;
-          // Decode the Base64 string to a byte array
-          const decodedData = base64.decode(encodedData);
-
-          const byteArray = [];
-          for (let i = 0; i < decodedData.length; i++) {
-            byteArray.push(decodedData.charCodeAt(i));
-          }
-          // this is decimal values of each paceket [83,83,...,69,69]
-          // console.log("byteArray", byteArray);
-          // console.log("isRecordingRef", isRecordingRef.current);
-          if (isRecordingRef.current) {
-            addToDataBuffer(byteArray); // Accumulate binary data
-            // console.log("data is being recorded");
-          }
-
-          // console.log("data is streaming");
-        } else {
-          console.error("Characteristic value is null or undefined.");
-        }
-      } catch (error: unknown) {
-        console.log("Error receiving data", error);
-        handleError(error, "Error receiving data");
-      }
-    };
-  ////
 
   return {
     requestPermissions, // Function to request necessary permissions
@@ -332,13 +336,15 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     allDevices, // List of all discovered devices
     connectedDevice, // Currently connected device
     scanForPeripherals, // Function to start scanning for devices
-    toggleDataStreaming, // Function to start or pause data streaming for GM5
-    dataStreaming, // Function to start data streaming for GM5
-    // packet, // Received data packet
+    handleToggleDataStreaming, // Function to start or pause data streaming for GM5
+    handleLEDLevel, // Function to adjust LED light level
+    startDataStreaming, // Function to start data streaming for GM5
     isDataStreaming, // Data streaming status
     setIsDataStreaming, // Set data streaming status
-    // packetNumber, // Packet number
+    packetLossData, // Packet loss LIVE data
   };
 }
 
 export default useBLE;
+
+////

@@ -1,34 +1,34 @@
-import 'dotenv/config';
+import "dotenv/config";
 
 export default {
   expo: {
-    name: "Glymphometer",
+    name: "GlymphoLink",
     slug: "Glymphometer",
     version: "1.0.0",
     orientation: "portrait",
     extra: {
-      firebaseApiKey: (process.env.FIREBASE_API_KEY),
-      firebaseProjectId: (process.env.FIREBASE_PROJECT_ID),
-      firebaseStorageBucket: (process.env.FIREBASE_STORAGE_BUCKET),
-      firebaseAppId: (process.env.FIREBASE_APP_ID),
+      firebaseApiKey: process.env.FIREBASE_API_KEY,
+      firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
+      firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      firebaseAppId: process.env.FIREBASE_APP_ID,
       eas: {
-        projectId: "4933a55d-fb86-4d56-b30a-975a47b34831", 
+        projectId: "4933a55d-fb86-4d56-b30a-975a47b34831",
       },
     },
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "light",
-    splash: { 
+    splash: {
       image: "./assets/images/splash.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.freelancers.glympholink", 
+      bundleIdentifier: "com.freelancers.glympholink",
     },
     android: {
-      package: "com.freelancers.glympholink", 
+      package: "com.freelancers.glympholink",
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
         backgroundColor: "#ffffff",
@@ -40,7 +40,7 @@ export default {
       ],
     },
     web: {
-      bundler: "metro", 
+      bundler: "metro",
       output: "static",
       favicon: "./assets/images/favicon.png",
     },
@@ -51,7 +51,8 @@ export default {
         {
           isBackgroundEnabled: true,
           modes: ["peripheral", "central"],
-          bluetoothAlwaysPermission: "Allow $(PRODUCT_NAME) to connect to Bluetooth devices",
+          bluetoothAlwaysPermission:
+            "Allow $(PRODUCT_NAME) to connect to Bluetooth devices",
         },
       ],
     ],
