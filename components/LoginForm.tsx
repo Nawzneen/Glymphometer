@@ -1,30 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import { loginAndGetToken } from "../services/authService";
+import { AuthContext } from "../contexts/AuthContext";
 
-export default function LoginForm({
-  onLoginSuccess,
-}: {
-  onLoginSuccess: (token: string) => void;
-}) {
+interface LoginFormProps {
+  onLoginSuccess: () => void;
+}
+export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { signIn } = useContext(AuthContext);
 
   const handleLogin = async () => {
+    // console.log("Logging in with:", email, password);
     if (!email || !password) {
       Alert.alert("Validation Error", "Please enter both email and password.");
       return;
     }
 
     setLoading(true);
-    const token = await loginAndGetToken(email, password);
-    setLoading(false);
-
-    if (token) {
-      //console.log("Token:", token);
-      onLoginSuccess(token);
-    } else {
+    try {
+      await signIn(email, password); // No need to handle token here, AuthContext will do it.
+      setLoading(false);
+      onLoginSuccess();
+    } catch (error) {
+      setLoading(false);
       Alert.alert("Login Failed", "Invalid email or password.");
     }
   };
