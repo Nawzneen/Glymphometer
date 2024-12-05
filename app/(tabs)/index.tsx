@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "../../components/CustomButton";
-import { SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import {
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+  ScrollView,
+} from "react-native";
 import DeviceModal from "../../components/modals/DeviceConnectionModal";
 import useBLE from "../../utils/useBLE";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
 import AdjustLEDLevel from "@/components/AdjustLEDLevel";
-import { loginAndGetToken } from "../../services/authService";
-import Constants from "expo-constants";
-import LoginForm from "@/components/LoginForm";
-import FileUpload from "@/components/FileUpload";
 
 export default function index() {
   const isRecordingRef = useRef(false);
@@ -53,16 +54,6 @@ export default function index() {
     setIsModalVisible(true);
   }, [scanForDevices]);
 
-  //#################//
-  const [token, setToken] = useState<string | null>(null);
-
-  const handleLoginSuccess = (token: string) => {
-    setToken(token); // Store token after successful login
-    //console.log("token from App:", token);
-  };
-
-  //#################//
-
   const handleDataStreamingToggle = useCallback(
     async (value: boolean) => {
       if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
@@ -77,27 +68,22 @@ export default function index() {
 
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
-      <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
-        <View>
-          <CustomButton title="Connect to GM5" onPress={openModal} />
-
-          {!token ? (
-            <LoginForm onLoginSuccess={handleLoginSuccess} />
-          ) : (
-            /*<DataEntryForm token={token} />*/
-            <FileUpload token={token} />
-          )}
+      <ScrollView className="flex-gow">
+        <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
+          <View>
+            <CustomButton title="Connect to GM5" onPress={openModal} />
+          </View>
         </View>
-      </View>
-      <View className="">
-        {connectedDevice ? (
-          <>
-            <View className="mt-8 flex-row flex gap-x-1 justify-center items-center">
-              <Text className="text-xl font-bold text-primary-color">
-                {connectedDevice.name} is{" "}
-                {connectedDevice ? "Connected" : "Disconnected"}
-              </Text>
-              {/* <TouchableOpacity onPress={disconnectDevice} className="ml-2">
+
+        <View className="">
+          {connectedDevice ? (
+            <>
+              <View className="mt-8 flex-row flex gap-x-1 justify-center items-center">
+                <Text className="text-xl font-bold text-primary-color">
+                  {connectedDevice.name} is{" "}
+                  {connectedDevice ? "Connected" : "Disconnected"}
+                </Text>
+                {/* <TouchableOpacity onPress={disconnectDevice} className="ml-2">
                 <Ionicons
                   name="refresh"
                   size={24}
@@ -105,49 +91,50 @@ export default function index() {
                   className="ml-2"
                 />
               </TouchableOpacity> */}
-              <TouchableOpacity
-                onPress={handleDisconnectDevice}
-                className="ml-2 bg-gray-200 p-2 rounded-full"
-              >
-                <AntDesign name="disconnect" size={24} color="black" />
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={handleDisconnectDevice}
+                  className="ml-2 bg-gray-200 p-2 rounded-full"
+                >
+                  <AntDesign name="disconnect" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
 
-            <SignalQuality
-              isDataStreaming={isDataStreaming}
-              onToggleDataStreaming={handleDataStreamingToggle}
-              isLoading={isLoading}
-              isRecordingPaused={isRecordingPaused}
-              packetLossData={packetLossData}
-            />
-            <AdjustLEDLevel
-              handleLEDLevel={handleLEDLevel}
-              isDataStreaming={isDataStreaming}
-              isRecording={isRecording}
-            />
+              <SignalQuality
+                isDataStreaming={isDataStreaming}
+                onToggleDataStreaming={handleDataStreamingToggle}
+                isLoading={isLoading}
+                isRecordingPaused={isRecordingPaused}
+                packetLossData={packetLossData}
+              />
+              <AdjustLEDLevel
+                handleLEDLevel={handleLEDLevel}
+                isDataStreaming={isDataStreaming}
+                isRecording={isRecording}
+              />
 
-            <Record
-              isDataStreaming={isDataStreaming}
-              isRecordingRef={isRecordingRef}
-              isRecordingPaused={isRecordingPaused}
-              setIsRecordingPaused={setIsRecordingPaused}
-              isRecording={isRecording}
-              setIsRecording={setIsRecording}
-            />
-          </>
-        ) : (
-          <Text className="mt-16 text-primary-text-color text-center font-bold text-2xl px-4">
-            Please connect your phone to Gmeter.
-          </Text>
-        )}
-      </View>
+              <Record
+                isDataStreaming={isDataStreaming}
+                isRecordingRef={isRecordingRef}
+                isRecordingPaused={isRecordingPaused}
+                setIsRecordingPaused={setIsRecordingPaused}
+                isRecording={isRecording}
+                setIsRecording={setIsRecording}
+              />
+            </>
+          ) : (
+            <Text className="mt-16 text-primary-text-color text-center font-bold text-2xl px-4">
+              Please connect your phone to Gmeter.
+            </Text>
+          )}
+        </View>
 
-      <DeviceModal
-        closeModal={hideModal}
-        visible={isModalVisible}
-        connectToPeripheral={handleConnectToDevice}
-        devices={allDevices}
-      />
+        <DeviceModal
+          closeModal={hideModal}
+          visible={isModalVisible}
+          connectToPeripheral={handleConnectToDevice}
+          devices={allDevices}
+        />
+      </ScrollView>
       <ToastMessages />
     </SafeAreaView>
   );
