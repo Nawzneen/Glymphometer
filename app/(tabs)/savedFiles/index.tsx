@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
@@ -17,9 +17,15 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import FileInfoModal from "@/components/modals/FileInfoModal";
+import LoginModal from "@/components/modals/LoginModal";
 import { FileInfoType } from "@/types/globalTypes";
+import CustomButton from "@/components/CustomButton";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthContext } from "@/contexts/AuthContext";
+import FileUpload from "@/components/FileUpload";
 
 const SavedFiles = () => {
+  console.log("SavedFiles");
   const [files, setFiles] = useState<
     Array<{
       name: string;
@@ -30,9 +36,16 @@ const SavedFiles = () => {
   >([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] =
+    useState<boolean>(false);
   const [fileInfo, setFileInfo] = useState<FileInfoType | null | undefined>(
     null
   );
+  const { token, signOut } = useContext(AuthContext);
+  useEffect(() => {
+    console.log("Token in SavedFiles:", token);
+    // Perform any actions when token changes (e.g., fetch files)
+  }, [token]);
   const fetchFiles = useCallback(async () => {
     try {
       await createFolder(); // if the folder already exist, it will continue to other parts of the code
@@ -68,6 +81,7 @@ const SavedFiles = () => {
       setRefresh(false);
     }
   }, []);
+
   useFocusEffect(
     useCallback(() => {
       fetchFiles(); // Refresh the file list whenever the screen is focused
@@ -195,13 +209,13 @@ const SavedFiles = () => {
       }
     );
   };
-
   return (
     <SafeAreaView className="flex-1">
       <View className="py-4 flex flex-row justify-center items-center gap-x-2 bg-primary-color">
         <Text className="text-lg text-center text-light-text-color ">
           Saved Files
         </Text>
+        {/* <Text>{token}</Text> */}
         {/* <TouchableOpacity onPress={() => setRefresh(true)}>
           <Feather name="refresh-ccw" size={24} color="white" />
         </TouchableOpacity> */}
@@ -223,11 +237,56 @@ const SavedFiles = () => {
           />
         )}
       </View>
+
+      {/* /////////////// */}
+      {/* <>
+          <FileUpload token={token} />
+          <CustomButton
+            title="Sign Out"
+            onPress={() => {
+              signOut();
+              Toast.show({
+                type: "success",
+                text1: "Logged out successfully",
+                position: "top",
+              });
+            }}
+          />
+        </> */}
+
+      {token ? (
+        <CustomButton
+          title="Sign Out"
+          onPress={() => {
+            signOut();
+          }}
+        />
+      ) : (
+        <CustomButton
+          title="Sign In / Sign Up"
+          onPress={() => {
+            setIsLoginModalVisible(true);
+          }}
+        />
+      )}
+      {/* ////////////// */}
+      {/* <View>
+          <CustomButton
+            title="SignIn/SignUp"
+            onPress={() => {
+              setIsLoginModalVisible(true);
+            }}
+          ></CustomButton>
+        </View> */}
       <Toast />
       <FileInfoModal
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
         info={fileInfo}
+      />
+      <LoginModal
+        isModalVisible={isLoginModalVisible}
+        setIsModalVisible={setIsLoginModalVisible}
       />
     </SafeAreaView>
   );
