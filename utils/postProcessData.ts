@@ -174,7 +174,8 @@ export const postProcessData = async (fileUri: string) => {
   );
 
   return {
-    packetsNumbre: packetNumbersSet.size,
+    packetsNumbre: packetNumbersSet.size, // Total packets processed without duplicates
+    // packetsNumbre: packetNumbersArray.length, // Total packets processed counting duplicates
     firstPacketNumber,
     lastPacketNumber,
     duplicatePackets,

@@ -33,17 +33,20 @@ async function discoverBLEServicesCharactristics(deviceConnection: Device) {
 }
 
 // Function to read the battery level of the device (it doesnt work now)
-async function readBatteryLevel(device: Device) {
-  const BATTERY_SERVICE_UUID = "180F";
-  const BATTERY_LEVEL_CHAR_UUID = "2A19";
-  device
-    .readCharacteristicForService(BATTERY_SERVICE_UUID, BATTERY_LEVEL_CHAR_UUID)
-    .then((Characteristic) => {
-      const batteryLevel = Characteristic.value;
-      console.log("Battery Level is", batteryLevel);
-    })
-    .catch((error) => {
-      console.log("Error in reading battery level", error);
-    });
-}
-export { discoverBLEServicesCharactristics, readBatteryLevel };
+// async function readBatteryLevel(device: Device) {
+//   const BATTERY_SERVICE_UUID = "180F";
+//   const BATTERY_LEVEL_CHAR_UUID = "2A19";
+//   device
+//     .readCharacteristicForService(BATTERY_SERVICE_UUID, BATTERY_LEVEL_CHAR_UUID)
+//     .then((Characteristic) => {
+//       const batteryLevel = Characteristic.value;
+//       console.log("Battery Level is", batteryLevel);
+//     })
+//     .catch((error) => {
+//       console.log("Error in reading battery level", error);
+//     });
+// }
+export {
+  discoverBLEServicesCharactristics,
+  //  readBatteryLevel
+};

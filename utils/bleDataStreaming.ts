@@ -6,16 +6,16 @@ import {
   Device,
 } from "react-native-ble-plx";
 import { Dispatch, SetStateAction, MutableRefObject } from "react";
-import { handleError } from "./handleError";
+import { handleError } from "@/utils/handleError";
 import Toast from "react-native-toast-message";
 import base64 from "react-native-base64";
 import {
   DATA_SERVICE_UUID,
   RX_CHARACTERISTIC_UUID,
   TX_CHARACTERISTIC_UUID,
-} from "./bleConstants";
+} from "@/utils/bleConstants";
 
-import { addToDataBuffer } from "./dataBuffer";
+import { addToDataBuffer } from "@/utils/dataBuffer";
 
 type PacketStats = {
   receivedPacketNumbers: Set<number>;
@@ -38,7 +38,7 @@ export const toggleDataStreaming =
     packetStats: PacketStats
   ): Promise<void> => {
     console.log("toogle data", command);
-    const status = command === "S" ? "Start" : "Pause";
+    const status = command === "S" ? "Start" : "Paus";
     if (!connectedDevice) {
       Toast.show({
         type: "error",
@@ -60,7 +60,7 @@ export const toggleDataStreaming =
           command === "S" ? "Started" : "Paused"
         }`,
         text2: `Cannot ${
-          command === "S" ? "start" : "pause"
+          command === "S" ? "Start" : "Pause"
         } again without toggling.`,
         position: "bottom",
       });

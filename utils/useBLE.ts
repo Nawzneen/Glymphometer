@@ -1,14 +1,17 @@
-import { handleError } from "./handleError";
+import { handleError } from "@/utils/handleError";
 import Toast from "react-native-toast-message";
-import { requestPermissions } from "./requestPermissions";
+import { requestPermissions } from "@/utils/requestPermissions";
 import { useRef, useEffect, useState, useCallback } from "react";
-import { connectToDevice, disconnectDevice } from "./bleConnection";
+import { connectToDevice, disconnectDevice } from "@/utils/bleConnection";
 import { clearDataBuffer } from "@/utils/dataBuffer";
-import { DATA_SERVICE_UUID } from "./bleConstants";
-import { adjustLEDLevel } from "./bleAdjustLEDLevel";
+import { DATA_SERVICE_UUID } from "@/utils/bleConstants";
+import { adjustLEDLevel } from "@/utils/bleAdjustLEDLevel";
 import { BleError, Device, Subscription } from "react-native-ble-plx";
-import { toggleDataStreaming, startDataStreaming } from "./bleDataStreaming";
-import bleManager from "./bleManager";
+import {
+  toggleDataStreaming,
+  startDataStreaming,
+} from "@/utils/bleDataStreaming";
+import bleManager from "@/utils/bleManager";
 import { Alert } from "react-native";
 import { Buffer } from "buffer";
 

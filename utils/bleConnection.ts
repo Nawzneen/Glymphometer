@@ -1,7 +1,6 @@
 import { Device } from "react-native-ble-plx";
 import bleManager from "@/utils/bleManager";
-import { discoverBLEServicesCharactristics } from "./bleCharacteristics";
-import { handleError } from "@/utils/handleError";
+import { discoverBLEServicesCharactristics } from "@/utils/bleCharacteristics";
 
 //FUNCTION TO CONNECT TO THE BLE DEVICE
 export const connectToDevice = async (device: Device) => {
