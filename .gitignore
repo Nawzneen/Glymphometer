@@ -20,8 +20,7 @@ android/
 expo-env.d.ts
 # @end expo-cli
 
-utils/backup-bleResponseSubscription.ts
+
 .env
 actions-runner/
-useBLE.test.ts
-__mocks__/
+
