@@ -274,9 +274,10 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   //** This function should only work if the isDataStreaming true. */
   const handleLEDLevel = async (value: number) => {
     if (!isDataStreaming) {
-      handleError(
-        "Data streaming is should be active for this function to work"
-      );
+      // the below line throws an unnecessary error message
+      // handleError(
+      //   "Data streaming is should be active for this function to work"
+      // );
       return;
     }
     if (connectedDevice) {
