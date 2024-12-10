@@ -7,6 +7,7 @@ interface CustomButtonProps {
   customButtonStyle?: object;
   textStyle?: object;
   className?: object;
+  disabled?: boolean;
 }
 const CustomButton: React.FC<CustomButtonProps> = ({
   title = "Click Me", // Default title
@@ -14,12 +15,18 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   customButtonStyle = {}, // Default button style
   textStyle = {}, // Default text style
   className = {},
+  disabled = false, // Default disabled state
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.button, customButtonStyle]} // Combine default and overridden styles
+      style={[
+        styles.button,
+        customButtonStyle,
+        disabled && { backgroundColor: "gray", opacity: 0.6 },
+      ]} // Combine default and overridden styles
       className="bg-primary-color"
       onPress={onPress}
+      disabled={disabled}
     >
       <Text style={[styles.text, textStyle]} className="text-light-text-color">
         {title}
