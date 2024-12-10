@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
-import { loginAndGetToken } from "../services/authService";
-import { AuthContext } from "../contexts/AuthContext";
+import { View, Text, TextInput, Alert } from "react-native";
+import { AuthContext } from "@/contexts/AuthContext";
+import CustomButton from "@/components/CustomButton";
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -13,7 +13,6 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   const { signIn } = useContext(AuthContext);
 
   const handleLogin = async () => {
-    // console.log("Logging in with:", email, password);
     if (!email || !password) {
       Alert.alert("Validation Error", "Please enter both email and password.");
       return;
@@ -31,10 +30,10 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Email:</Text>
+    <View className="w-full p-5">
+      <Text className="text-base mt-4">Email:</Text>
       <TextInput
-        style={styles.input}
+        className="h-10 border border-gray-300 rounded-md p-2 mt-2"
         placeholder="Enter your email"
         value={email}
         onChangeText={setEmail}
@@ -42,38 +41,21 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         autoCapitalize="none"
       />
 
-      <Text style={styles.label}>Password:</Text>
+      <Text className="text-base mt-4">Password:</Text>
       <TextInput
-        style={styles.input}
+        className="h-10 border border-gray-300 rounded-md p-2 mt-2"
         placeholder="Enter your password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-
-      <Button
-        title={loading ? "Logging in..." : "Login"}
-        onPress={handleLogin}
-        disabled={loading}
-      />
+      <View className="mt-4 ">
+        <CustomButton
+          title={loading ? "Logging in..." : "Login"}
+          onPress={handleLogin}
+          disabled={loading}
+        />
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-  },
-});
