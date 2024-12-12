@@ -1,7 +1,7 @@
-import React from "react";
-import { View, Text, TextInput, StyleSheet } from "react-native";
+import React, { Dispatch, SetStateAction } from "react";
+import { View, Text, TextInput } from "react-native";
+import CustomButton from "@/components/CustomButton";
 
-// Define the types for datasetDetails and onDatasetChange
 interface DatasetDetails {
   created: string;
   country: string;
@@ -11,45 +11,45 @@ interface DatasetDetails {
 interface DataEntryFormProps {
   datasetDetails: DatasetDetails;
   onDatasetChange: (field: keyof DatasetDetails, value: string) => void;
+  handleUploadFiles: () => void;
+  isLoading: boolean;
+  setIsloading: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function DataEntryForm({
   datasetDetails,
   onDatasetChange,
+  handleUploadFiles,
+  isLoading,
+  setIsloading,
 }: DataEntryFormProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Country (required):</Text>
+    <View className="mt-8 mx-auto w-[90%]">
+      <Text className="text-xl mb-8">Please fill the information below:</Text>
+      <Text className="text-base">Country (required):</Text>
       <TextInput
-        style={styles.input}
+        className="p-3 my-3 border border-gray-300 rounded-md "
         value={datasetDetails.country}
         onChangeText={(value) => onDatasetChange("country", value)}
-        placeholder="Enter country"
+        placeholder="Enter country..."
       />
-      <Text style={styles.label}>Description:</Text>
+      <Text className="text-base">Description:</Text>
       <TextInput
-        style={styles.input}
+        className="p-3 my-3 border border-gray-300 rounded-md "
         value={datasetDetails.description}
         onChangeText={(value) => onDatasetChange("description", value)}
-        placeholder="Enter description"
+        placeholder="Enter description..."
       />
+      <View className="mt-2">
+        <CustomButton
+          title={isLoading ? "Uploading..." : "Upload"}
+          onPress={() => {
+            handleUploadFiles();
+            setIsloading(true);
+          }}
+          disabled={isLoading}
+        />
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 16,
-  },
-});
