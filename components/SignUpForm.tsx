@@ -66,7 +66,7 @@ export default function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
 
       <View className="mt-4 ">
         <CustomButton
-          title={loading ? "Logging in..." : "Login"}
+          title={loading ? "Signing Up..." : "Sign Up"}
           onPress={handleSignUp}
           disabled={loading}
         />
