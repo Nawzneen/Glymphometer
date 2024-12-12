@@ -59,10 +59,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20.14
+
       - name: Install Yarn
         run: npm install -g yarn
+
       - name: Install dependencies
         run: yarn install
+
+      - name: Run Tests
+        run: yarn test --ci
 
       - name: Setup Java JDK
         uses: actions/setup-java@v3
@@ -91,17 +96,17 @@ jobs:
 
       - name: Bundle JavaScript and Assets
         run: |
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+          npx react-native bundle --platform android --dev false --entry-file app/(tabs)/index.tsx --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
 
       - name: Execute Gradle build
         run: |
           cd android
           ./gradlew assembleRelease --stacktrace --info
 
-      - name: Run Fastlane for Android
-        run: |
-          cd android
-          bundle exec fastlane build_qa
+      # - name: Run Fastlane for Android
+      #   run: |
+      #     cd android
+      #     bundle exec fastlane build_qa
       # - name: Build Android bundle
       #   run: cd android && ./gradlew assembleRelease
 
