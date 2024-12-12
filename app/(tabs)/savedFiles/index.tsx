@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { createFolder } from "@/utils/saveData";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import FileInfoModal from "@/components/modals/FileInfoModal";
 import LoginModal from "@/components/modals/LoginModal";
@@ -23,17 +22,19 @@ import CustomButton from "@/components/CustomButton";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthContext } from "@/contexts/AuthContext";
 import FileUpload from "@/components/FileUpload";
+import UploadModal from "@/components/modals/UploadModal";
+import CheckBox from "@react-native-community/checkbox";
+import { saveManually } from "@/utils/saveManually";
 
+interface FileType {
+  name: string;
+  uri: string;
+  modificationTime?: number;
+  size: number;
+}
 const SavedFiles = () => {
   console.log("SavedFiles");
-  const [files, setFiles] = useState<
-    Array<{
-      name: string;
-      uri: string;
-      modificationTime?: number;
-      size: number;
-    }>
-  >([]);
+  const [files, setFiles] = useState<Array<FileType>>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isLoginModalVisible, setIsLoginModalVisible] =
@@ -42,6 +43,10 @@ const SavedFiles = () => {
     null
   );
   const { token, signOut } = useContext(AuthContext);
+  const [isUploadModalVisible, setIsUploadModalVisible] =
+    useState<boolean>(false);
+  const [selectedFiles, setSelectedFiles] = useState<object[]>([]);
+
   useEffect(() => {
     console.log("Token in SavedFiles:", token);
     // Perform any actions when token changes (e.g., fetch files)
@@ -55,7 +60,6 @@ const SavedFiles = () => {
         fileList.map(async (fileName) => {
           const fileUri = folderUri + fileName;
           const fileInfo = await FileSystem.getInfoAsync(fileUri);
-
           if (fileInfo.exists) {
             return {
               name: fileName,
@@ -140,13 +144,21 @@ const SavedFiles = () => {
     return (
       <View className="mb-4 py-3 px-3 gap-x-1 rounded-lg flex flex-col justify-between bg-gray-200">
         <View className="flex flex-row justify-between items-center">
-          <Text
-            className="text-lg flex-shrink"
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {item.name}
-          </Text>
+          <View className="flex flex-row  items-center">
+            <CheckBox
+              value={selectedFiles.includes(item)}
+              onValueChange={() => toggleFileSelection(item)}
+              // tintColors={{ true: "#007AFF", false: "#D3D3D3" }}
+            />
+            <Text
+              className="text-lg flex-shrink"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.name}
+            </Text>
+          </View>
+
           <Text>{formattedSize}</Text>
         </View>
         <View className="flex flex-row justify-between items-center mt-1">
@@ -209,16 +221,17 @@ const SavedFiles = () => {
       }
     );
   };
+  const toggleFileSelection = (file: FileType) => {
+    setSelectedFiles((prev) =>
+      prev.includes(file) ? prev.filter((f) => f !== file) : [...prev, file]
+    );
+  };
   return (
     <SafeAreaView className="flex-1">
       <View className="py-4 flex flex-row justify-center items-center gap-x-2 bg-primary-color">
         <Text className="text-lg text-center text-light-text-color ">
           Saved Files
         </Text>
-        {/* <Text>{token}</Text> */}
-        {/* <TouchableOpacity onPress={() => setRefresh(true)}>
-          <Feather name="refresh-ccw" size={24} color="white" />
-        </TouchableOpacity> */}
       </View>
       <View className="mt-4 mx-3 flex-1 ">
         {refresh ? (
@@ -237,47 +250,33 @@ const SavedFiles = () => {
           />
         )}
       </View>
-
-      {/* /////////////// */}
-      {/* <>
-          <FileUpload token={token} />
+      <View className="mt-2">
+        <CustomButton
+          title="Upload Files"
+          disabled={selectedFiles.length === 0}
+          onPress={() => setIsUploadModalVisible(true)}
+        />
+      </View>
+      {/* <View className="mt-2">
+        <CustomButton title="save manually" onPress={() => saveManually()} />
+      </View> */}
+      <View className="mt-2">
+        {token ? (
           <CustomButton
             title="Sign Out"
             onPress={() => {
               signOut();
-              Toast.show({
-                type: "success",
-                text1: "Logged out successfully",
-                position: "top",
-              });
             }}
           />
-        </> */}
-
-      {token ? (
-        <CustomButton
-          title="Sign Out"
-          onPress={() => {
-            signOut();
-          }}
-        />
-      ) : (
-        <CustomButton
-          title="Sign In / Sign Up"
-          onPress={() => {
-            setIsLoginModalVisible(true);
-          }}
-        />
-      )}
-      {/* ////////////// */}
-      {/* <View>
+        ) : (
           <CustomButton
-            title="SignIn/SignUp"
+            title="Sign In / Sign Up"
             onPress={() => {
               setIsLoginModalVisible(true);
             }}
-          ></CustomButton>
-        </View> */}
+          />
+        )}
+      </View>
       <Toast />
       <FileInfoModal
         isModalVisible={isModalVisible}
@@ -287,6 +286,12 @@ const SavedFiles = () => {
       <LoginModal
         isModalVisible={isLoginModalVisible}
         setIsModalVisible={setIsLoginModalVisible}
+      />
+      <UploadModal
+        isModalVisible={isUploadModalVisible}
+        setIsModalVisible={setIsUploadModalVisible}
+        selectedFiles={selectedFiles}
+        setSelectedFiles={setSelectedFiles}
       />
     </SafeAreaView>
   );
