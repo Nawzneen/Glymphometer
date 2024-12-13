@@ -36,7 +36,7 @@ const Record: FC<RecordProps> = ({
   const [error, setError] = useState<string>("");
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // Handle changes in data streaming or recording
   useEffect(() => {
     setError("");
@@ -127,6 +127,7 @@ const Record: FC<RecordProps> = ({
 
   const handleSaveData = async (fileName: string) => {
     try {
+      setIsLoading(true);
       const dataBuffer = getDataBuffer();
       await saveDataToFile(dataBuffer, fileName);
       setIsRecordingPaused(false);
@@ -137,6 +138,8 @@ const Record: FC<RecordProps> = ({
     } catch (error) {
       // handleError(error, "Error saving data");
       setError("Error saving data to file");
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -203,6 +206,7 @@ const Record: FC<RecordProps> = ({
         visible={modalVisible}
         onSave={handleSaveData}
         onDiscard={discardData}
+        isLoading={isLoading}
       />
     </View>
   );

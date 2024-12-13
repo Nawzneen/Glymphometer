@@ -7,21 +7,23 @@ import {
   SafeAreaView,
   TextInput,
 } from "react-native";
+import CustomButton from "@/components/CustomButton";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Keyboard } from "react-native";
 interface ChooseFileNameModalProps {
   visible: boolean;
   onSave: (fileName: string) => void;
   onDiscard: () => void;
+  isLoading: boolean;
 }
 
 const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
   visible,
   onSave,
   onDiscard,
+  isLoading,
 }) => {
   const [fileName, setFileName] = useState<string>("");
-
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       "keyboardDidShow",
@@ -79,12 +81,27 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
                 />
               </View>
               <View className="flex flex-row justify-center items-center gap-x-4 mt-8">
+                <View>
+                  <CustomButton
+                    title="Cancel"
+                    onPress={handleDiscard}
+                    disabled={isLoading}
+                  />
+                </View>
+                <View>
+                  <CustomButton
+                    title={isLoading ? "Saving" : "Save"}
+                    onPress={handleSave}
+                    disabled={isLoading}
+                  />
+                </View>
+                {/* 
                 <TouchableOpacity onPress={handleDiscard}>
                   <AntDesign name="closecircleo" size={40} color="black" />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleSave}>
                   <AntDesign name="checkcircleo" size={40} color="black" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
               </View>
             </View>
           </SafeAreaView>
