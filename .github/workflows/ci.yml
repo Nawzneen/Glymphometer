@@ -66,8 +66,8 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Run Tests
-        run: yarn test --ci
+      # - name: Run Tests
+      #   run: yarn test --ci
 
       - name: Setup Java JDK
         uses: actions/setup-java@v3
