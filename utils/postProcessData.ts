@@ -102,8 +102,9 @@ const calculateExpectedPackets = (
     return 65535 - firstPacketNumber + 1 + (lastPacketNumber + 1);
   }
 };
-const calculateDuration = (receivedPackets: number) => {
-  const duration = receivedPackets * 0.056; // Each packet receives in 56ms
+const calculateDuration = (expectedPackets: number) => {
+  const duration = Math.floor(expectedPackets * 0.056); // Each packet receives in 56ms
+
   return { duration };
 };
 // Function to calculate packet loss and percentage
@@ -159,7 +160,7 @@ export const postProcessData = async (fileUri: string) => {
     packetNumbersSet.size
   );
   // Calculate duration of recording
-  const { duration } = calculateDuration(packetNumbersSet.size);
+  const { duration } = calculateDuration(expectedPacketsNumber);
 
   // Output results
   console.log(`First Packet Number: ${firstPacketNumber}`);
