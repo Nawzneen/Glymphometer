@@ -96,7 +96,7 @@ jobs:
 
       - name: Bundle JavaScript and Assets
         run: |
-          npx react-native bundle --platform android --dev false --entry-file app/(tabs)/index.tsx --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+          npx react-native bundle --platform android --dev false --entry-file app/\(tabs\)/index.tsx --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
 
       - name: Execute Gradle build
         run: |
