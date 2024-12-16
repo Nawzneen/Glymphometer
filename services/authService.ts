@@ -45,9 +45,10 @@ export async function loginAndGetToken(email: string, password: string) {
       email,
       password
     );
-    const token = await getIdToken(userCredential.user);
+    const token = await getIdToken(userCredential.user); //Access token
+    const refreshToken = userCredential.user.refreshToken; //Refresh token from firebase
     console.log("Successfully logged in. Token:", token);
-    return token;
+    return { token, refreshToken };
   } catch (error: any) {
     console.log("Error during login:", error.message);
     throw error;
@@ -73,8 +74,38 @@ export async function signOutUser() {
   try {
     await signOut(auth); // Sign out from Firebase
     await SecureStore.deleteItemAsync("userToken"); // delete token from SecureStore
+    await SecureStore.deleteItemAsync("refreshToken"); // delete refresh token from SecureStore
   } catch (error: any) {
     console.log("Error during sign out:", error.message);
+    throw error;
+  }
+}
+export async function refreshToken(token: string): Promise<string> {
+  try {
+    const auth = getAuth();
+    console.log(auth);
+    const response = await fetch(
+      `https://securetoken.googleapis.com/v1/token?key=${firebaseConfig.apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grant_type: "refresh_token",
+          refresh_token: token,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log("data is", data);
+      console.log("Successfully refreshed token:", data.access_token);
+      return data.access_token;
+    } else {
+      throw new Error("Failed to refresh token");
+    }
+  } catch (error: any) {
+    console.error("Error refreshing token:", error.message);
     throw error;
   }
 }

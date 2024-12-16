@@ -4,6 +4,7 @@ import * as SecureStore from "expo-secure-store";
 import { jwtDecode } from "jwt-decode";
 import {
   loginAndGetToken,
+  refreshToken,
   signOutUser,
   signUpAndGetToken,
 } from "../services/authService"; // Ensure you have these service functions
@@ -33,12 +34,31 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const loadToken = async () => {
       try {
         const storedToken = await SecureStore.getItemAsync("userToken");
-        console.log("storedToken in authContext is", storedToken);
-        if (storedToken && !isTokenExpired(storedToken)) {
-          setToken(storedToken);
+        const storedRefreshToken =
+          await SecureStore.getItemAsync("refreshToken");
+        console.log(
+          "storedToken & refresh token in authContext is",
+          storedToken,
+          storedRefreshToken
+        );
+        if (storedToken) {
+          const expired = await isTokenExpired(storedToken);
+          if (!expired) {
+            setToken(storedToken);
+          } else if (storedRefreshToken) {
+            try {
+              const newToken = await refreshToken(storedRefreshToken);
+              await SecureStore.setItemAsync("userToken", newToken); // Save the new token
+              setToken(newToken);
+            } catch (error) {
+              console.error("Error refreshing token:", error);
+              setToken(null);
+            }
+          } else {
+            console.log("No refresh token available, Logging out...");
+            setToken(null);
+          }
         } else {
-          console.log("stored oken doesnt exist or exired");
-          await SecureStore.deleteItemAsync("userToken");
           setToken(null);
         }
       } catch (error) {
@@ -49,26 +69,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadToken();
   }, []);
 
-  const isTokenExpired = (token: string): boolean => {
+  const isTokenExpired = async (token: string): Promise<boolean> => {
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      return decoded.exp < currentTime;
+      // check if token is expired
+      if (decoded.exp < currentTime) {
+        console.log("token is expired. Attempting to refresh...");
+        const storedRefreshToken =
+          await SecureStore.getItemAsync("refreshToken");
+        if (storedRefreshToken) {
+          try {
+            const newToken = await refreshToken(storedRefreshToken);
+            await SecureStore.setItemAsync("userToken", newToken); // Save the new token
+            return false; // Token succesfully refresed
+          } catch (error) {
+            console.error("Error refreshing token:", error);
+          }
+        }
+        console.log("Refresh token unavailable or refresh failed.");
+        return true; // Token expired and no refresh token available
+      }
+      return false; // Token is valid
     } catch (error) {
-      return true;
+      console.error("Error checking token expiration:", error);
+      return true; // Assume expired if error occurs
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    console.log("signing In in SignIn with", email, password);
     try {
-      const token = await loginAndGetToken(email, password);
+      const { token, refreshToken } = await loginAndGetToken(email, password);
       console.log("token from signIn", token);
-      if (token) {
+      if (token && refreshToken) {
         setToken(token);
-        await SecureStore.setItemAsync("userToken", token);
+        await SecureStore.setItemAsync("userToken", token); //Access token
+        await SecureStore.setItemAsync("refreshToken", refreshToken); // Refresh token
+      } else {
+        console.log("Login failed, missing token or refresh token");
+        throw new Error("Login failed. please try again.");
       }
     } catch (error) {
+      console.error("Sign-in error:", error);
       throw error;
     }
   };
