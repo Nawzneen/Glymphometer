@@ -56,14 +56,20 @@ const SavedFiles = () => {
       await createFolder(); // if the folder already exist, it will continue to other parts of the code
       const folderUri = FileSystem.documentDirectory + "userData/";
       const fileList = await FileSystem.readDirectoryAsync(folderUri);
+      // console.log("fileList", fileList);
       const filesWithInfo = await Promise.all(
         fileList.map(async (fileName) => {
+          // console.log("fileNameeeeeeeeeeee", fileName);
           const fileUri = folderUri + fileName;
           const fileInfo = await FileSystem.getInfoAsync(fileUri);
+          // const extension = fileName.split(".").pop();
+          // console.log("exxxxxxxxxxxxxxxxxxx", extension);
+          // console.log("fileInfo", fileInfo);
           if (fileInfo.exists) {
             return {
               name: fileName,
               uri: fileUri,
+              format: fileName.split(".").pop(),
               modificationTime: fileInfo.modificationTime,
               size: fileInfo.size,
             };
@@ -125,6 +131,7 @@ const SavedFiles = () => {
       uri: string;
       modificationTime?: number;
       size: number;
+      format?: string;
     };
   }) => {
     const fileUri = item.uri;
@@ -179,9 +186,11 @@ const SavedFiles = () => {
             <TouchableOpacity onPress={() => confirmDelete(fileUri)}>
               <AntDesign name="delete" size={26} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
-              <AntDesign name="infocirlceo" size={26} color="black" />
-            </TouchableOpacity>
+            {item.format === "bin" && (
+              <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
+                <AntDesign name="infocirlceo" size={26} color="black" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
@@ -250,32 +259,49 @@ const SavedFiles = () => {
           />
         )}
       </View>
-      <View className="mt-2">
-        <CustomButton
-          title="Upload Files"
-          disabled={selectedFiles.length === 0}
-          onPress={() => setIsUploadModalVisible(true)}
-        />
-      </View>
-      {/* <View className="mt-2">
-        <CustomButton title="save manually" onPress={() => saveManually()} />
-      </View> */}
-      <View className="mt-2">
+      <View
+        className=" p-3"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
+      >
         {token ? (
-          <CustomButton
-            title="Sign Out"
-            onPress={() => {
-              signOut();
-            }}
-          />
+          <View className="mt-2">
+            <CustomButton
+              title="Upload Files"
+              disabled={selectedFiles.length === 0}
+              onPress={() => setIsUploadModalVisible(true)}
+            />
+          </View>
         ) : (
-          <CustomButton
-            title="Sign In / Sign Up"
-            onPress={() => {
-              setIsLoginModalVisible(true);
-            }}
-          />
+          <View className="mt-2 mx-auto">
+            <Text> If you want to upload the files, please Sign In.</Text>
+          </View>
         )}
+        {/* <View className="mt-2">
+        <CustomButton title="save manually" onPress={() => saveManually()} />
+        </View> */}
+        <View className="mt-2">
+          {token ? (
+            <CustomButton
+              title="Sign Out"
+              onPress={() => {
+                signOut();
+              }}
+            />
+          ) : (
+            <CustomButton
+              title="Sign In / Sign Up"
+              onPress={() => {
+                setIsLoginModalVisible(true);
+              }}
+            />
+          )}
+        </View>
       </View>
       <Toast />
       <FileInfoModal
