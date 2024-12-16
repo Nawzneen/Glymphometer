@@ -2,6 +2,7 @@ import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";
+import convertData from "@/utils/dataConverter";
 
 // Function to sanitize the file name
 const sanitizeFilename = (fileName: string): string => {
@@ -12,23 +13,30 @@ export const saveDataToFile = async (
   fileName: string
 ) => {
   try {
+    const date = new Date();
     const uint8Array = new Uint8Array(dataBuffer);
     const base64Data = Buffer.from(uint8Array).toString("base64");
-
     const folderUri = await createFolder();
     const sanitizedFileName = sanitizeFilename(fileName);
-    const fileUri = folderUri + `${sanitizedFileName}_${Date.now()}.bin`;
+    const binFileUri = folderUri + `${sanitizedFileName}_${date}.bin`;
 
-    await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+    await FileSystem.writeAsStringAsync(binFileUri, base64Data, {
       encoding: FileSystem.EncodingType.Base64,
     });
-
-    console.log("File Info:", await FileSystem.getInfoAsync(fileUri));
+    // console.log("bin saved");
+    //convert the data to text
+    const { outputText } = convertData(uint8Array);
+    const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
+    await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    // console.log("txt saved");
+    // console.log("File Info:", await FileSystem.getInfoAsync(fileUri));
 
     Toast.show({
       type: "success",
       text1: "Data Saved Successfully",
-      text2: `File saved at: ${fileUri}`,
+      text2: `File saved.`,
       position: "top",
     });
 
