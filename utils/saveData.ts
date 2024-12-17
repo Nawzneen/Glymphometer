@@ -13,7 +13,8 @@ export const saveDataToFile = async (
   fileName: string
 ) => {
   try {
-    const date = new Date();
+    const date = formatDate();
+    // console.log(formatDate());
     const uint8Array = new Uint8Array(dataBuffer);
     const base64Data = Buffer.from(uint8Array).toString("base64");
     const folderUri = await createFolder();
@@ -23,15 +24,12 @@ export const saveDataToFile = async (
     await FileSystem.writeAsStringAsync(binFileUri, base64Data, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    // console.log("bin saved");
-    //convert the data to text
+
     const { outputText } = convertData(uint8Array);
     const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
     await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
       encoding: FileSystem.EncodingType.UTF8,
     });
-    // console.log("txt saved");
-    // console.log("File Info:", await FileSystem.getInfoAsync(fileUri));
 
     Toast.show({
       type: "success",
@@ -58,3 +56,18 @@ export const createFolder = async () => {
 
   return folderUri;
 };
+
+function formatDate() {
+  const date = new Date(Date.now()); // Convert from seconds to milliseconds
+
+  // Extract date and time components
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  const formattedDate = `${day}.${month}.${year}.${hours}.${minutes}.${seconds}`;
+  return formattedDate;
+}
