@@ -33,7 +33,6 @@ interface FileType {
   size: number;
 }
 const SavedFiles = () => {
-  console.log("SavedFiles");
   const [files, setFiles] = useState<Array<FileType>>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -42,6 +41,7 @@ const SavedFiles = () => {
   const [fileInfo, setFileInfo] = useState<FileInfoType | null | undefined>(
     null
   );
+  const [isFileInfoLoading, setIsFileInfoLoading] = useState<boolean>(false);
   const { token, signOut } = useContext(AuthContext);
   const [isUploadModalVisible, setIsUploadModalVisible] =
     useState<boolean>(false);
@@ -56,15 +56,10 @@ const SavedFiles = () => {
       await createFolder(); // if the folder already exist, it will continue to other parts of the code
       const folderUri = FileSystem.documentDirectory + "userData/";
       const fileList = await FileSystem.readDirectoryAsync(folderUri);
-      // console.log("fileList", fileList);
       const filesWithInfo = await Promise.all(
         fileList.map(async (fileName) => {
-          // console.log("fileNameeeeeeeeeeee", fileName);
           const fileUri = folderUri + fileName;
           const fileInfo = await FileSystem.getInfoAsync(fileUri);
-          // const extension = fileName.split(".").pop();
-          // console.log("exxxxxxxxxxxxxxxxxxx", extension);
-          // console.log("fileInfo", fileInfo);
           if (fileInfo.exists) {
             return {
               name: fileName,
@@ -123,6 +118,20 @@ const SavedFiles = () => {
       return `${mb.toFixed(2)} MB`; // 1 MB or more, show in MB
     }
   };
+
+  const handleFileInfo = async (fileUri: string) => {
+    setIsModalVisible(true);
+    setIsFileInfoLoading(true);
+    try {
+      const info = await postProcessData(fileUri);
+      setFileInfo(info);
+    } catch (error) {
+      console.error("Error processing file info", error);
+      handleError(error, "Error processing file info");
+    } finally {
+      setIsFileInfoLoading(false);
+    }
+  };
   const renderItem = ({
     item,
   }: {
@@ -138,16 +147,6 @@ const SavedFiles = () => {
     const formattedDate = formatDate(item.modificationTime);
     const formattedSize = formatFileSize(item.size);
 
-    const handleFileInfo = async (fileUri: string) => {
-      const info = await postProcessData(fileUri);
-      // console.log("info in validate data ", info);
-      if (info) {
-        setFileInfo(info);
-        setIsModalVisible(true);
-      } else {
-        console.log("failed to validate data");
-      }
-    };
     return (
       <View className="mb-4 py-3 px-3 gap-x-1 rounded-lg flex flex-col justify-between bg-gray-200">
         <View className="flex flex-row justify-between items-center">
@@ -308,6 +307,7 @@ const SavedFiles = () => {
         isModalVisible={isModalVisible}
         setIsModalVisible={setIsModalVisible}
         info={fileInfo}
+        isFileInfoLoading={isFileInfoLoading}
       />
       <LoginModal
         isModalVisible={isLoginModalVisible}

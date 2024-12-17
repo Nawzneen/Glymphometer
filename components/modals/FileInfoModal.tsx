@@ -12,12 +12,14 @@ interface FileInfoModalProps {
   info: FileInfoType | null | undefined;
   isModalVisible: boolean;
   setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  isFileInfoLoading: boolean;
 }
 
 const FileInfoModal: FC<FileInfoModalProps> = ({
   info,
   setIsModalVisible,
   isModalVisible,
+  isFileInfoLoading,
 }) => {
   const {
     packetsNumbre,
@@ -29,7 +31,6 @@ const FileInfoModal: FC<FileInfoModalProps> = ({
     packetLoss,
     packetLossPercentage,
   } = info || {};
-  console.log(isModalVisible, "inModal");
 
   return (
     <Modal
@@ -49,50 +50,60 @@ const FileInfoModal: FC<FileInfoModalProps> = ({
           className="w-[90%] h-[70%] bg-white rounded-lg overflow-hidden"
         >
           <SafeAreaView className="flex-1 bg-[#ffffff]  items-center mt-16">
-            <View className="flex flex-col ">
-              <Text className="text-xl text-center mb-8 font-extrabold">
-                File Information
-              </Text>
-              <Text className="text-base ">
-                Total Number of Packets:{" "}
-                <Text className="font-bold text-primary-color">
-                  {packetsNumbre}
+            <View className="flex flex-col px-2">
+              {isFileInfoLoading ? (
+                <Text className="flex mx-auto text-center text-xl font-bold">
+                  Loading
                 </Text>
-              </Text>
-              <Text className="text-base ">
-                Total Duration of Packets in Seconds:{" "}
-                <Text className="font-bold text-primary-color">{duration}</Text>
-              </Text>
-              <Text className="text-base ">
-                First Packet Number:{" "}
-                <Text className="font-bold text-primary-color">
-                  {firstPacketNumber}
-                </Text>
-              </Text>
-              <Text className="text-base ">
-                Last Packet Number:{" "}
-                <Text className="font-bold text-primary-color">
-                  {lastPacketNumber}
-                </Text>
-              </Text>
-              <Text className="text-base ">
-                Numebr of Duplicated Packets:{" "}
-                <Text className="font-bold text-primary-color">
-                  {duplicatePackets}
-                </Text>
-              </Text>
-              <Text className="text-base ">
-                Number of Lost Packets:{" "}
-                <Text className="font-bold text-primary-color">
-                  {packetLoss}
-                </Text>
-              </Text>
-              <Text className="text-base ">
-                Packet Loss Percentage:{" "}
-                <Text className="font-bold text-primary-color">
-                  {packetLossPercentage}%
-                </Text>
-              </Text>
+              ) : (
+                <>
+                  <Text className="text-xl text-center mb-8 font-extrabold">
+                    File Information
+                  </Text>
+                  <Text className="text-base ">
+                    Total Number of Packets:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {packetsNumbre}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    Total Duration of Packets in Seconds:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {duration}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    First Packet Number:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {firstPacketNumber}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    Last Packet Number:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {lastPacketNumber}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    Numebr of Duplicated Packets:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {duplicatePackets}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    Number of Lost Packets:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {packetLoss}
+                    </Text>
+                  </Text>
+                  <Text className="text-base ">
+                    Packet Loss Percentage:{" "}
+                    <Text className="font-bold text-primary-color">
+                      {packetLossPercentage}%
+                    </Text>
+                  </Text>
+                </>
+              )}
             </View>
           </SafeAreaView>
         </TouchableOpacity>
