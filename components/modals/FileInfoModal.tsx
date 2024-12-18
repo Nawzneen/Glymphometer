@@ -53,7 +53,7 @@ const FileInfoModal: FC<FileInfoModalProps> = ({
             <View className="flex flex-col px-2">
               {isFileInfoLoading ? (
                 <Text className="flex mx-auto text-center text-xl font-bold">
-                  Loading
+                  Loading...
                 </Text>
               ) : (
                 <>
