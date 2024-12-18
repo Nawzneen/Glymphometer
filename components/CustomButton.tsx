@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 55,
     paddingHorizontal: 10,
+    minWidth: 120,
   },
   text: {
     fontSize: 16,
