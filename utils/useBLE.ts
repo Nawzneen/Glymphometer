@@ -89,6 +89,10 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
       // No data to calculate packet Loss
       console.log("No data to calculate packet loss");
       setPacketLossData(null);
+      Alert.alert(
+        "Notice",
+        "There is a problem with data streaming.\nTurn data streaming off and on again."
+      );
     }
   };
   const calculateExpectedPackets = (
@@ -248,10 +252,23 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   // Function to disconnect from a BLE device
   const handleDisconnectDevice = async () => {
     if (connectedDevice) {
-      console.log("pause data streaming before disconnecting");
+      // Data streaming and Recording will be paused before disconnecting
       await handleToggleDataStreaming("P");
-      await disconnectDevice(connectedDevice);
-      setConnectedDevice(null);
+      Alert.alert(
+        "Disconect Device",
+        "Are you sure you want to disconnect? You will lose the recording data.",
+        [
+          { text: "Cancel", style: "cancel", onPress: () => {} },
+          {
+            text: "Disconnect",
+            onPress: async () => {
+              await disconnectDevice(connectedDevice);
+              setConnectedDevice(null);
+            },
+          },
+        ]
+      );
+
       Toast.show({
         type: "success",
         text1: "Disconnected",
