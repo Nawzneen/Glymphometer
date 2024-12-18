@@ -30,7 +30,7 @@ export default {
     android: {
       package: "com.freelancers.glympholink",
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
+        foregroundImage: "./assets/images/icon.png",
         backgroundColor: "#ffffff",
       },
       permissions: [
