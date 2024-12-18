@@ -23,4 +23,7 @@ expo-env.d.ts
 
 .env
 actions-runner/
+assets/textFiles/*
+
+utils/saveManually.ts
 
