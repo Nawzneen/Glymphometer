@@ -149,27 +149,29 @@ const SavedFiles = () => {
 
     return (
       <View className="mb-4 py-3 px-3 gap-x-1 rounded-lg flex flex-col justify-between bg-gray-200">
-        <View className="flex flex-row justify-between items-center">
-          <View className="flex flex-row  items-center">
+        <View className="flex flex-row justify-between items-center  ">
+          <View className="flex flex-row justify-start items-center flex-1">
             <CheckBox
               value={selectedFiles.includes(item)}
               onValueChange={() => toggleFileSelection(item)}
               // tintColors={{ true: "#007AFF", false: "#D3D3D3" }}
             />
             <Text
-              className="text-lg flex-shrink"
-              numberOfLines={1}
+              className="text-base flex-shrink flex-wrap pr-3 "
+              numberOfLines={0}
               ellipsizeMode="tail"
+              style={{ lineHeight: 20 }}
             >
               {item.name}
             </Text>
           </View>
-
-          <Text>{formattedSize}</Text>
+          <View className="">
+            <Text className="text-gray-500">{formattedSize}</Text>
+          </View>
         </View>
         <View className="flex flex-row justify-between items-center mt-1">
           <View>
-            <Text className="text-sm">{formattedDate}</Text>
+            <Text className="text-sm text-gray-500">{formattedDate}</Text>
           </View>
           <View
             className="
@@ -180,14 +182,14 @@ const SavedFiles = () => {
             gap-x-3"
           >
             <TouchableOpacity onPress={() => shareFile(fileUri)}>
-              <AntDesign name="sharealt" size={26} color="black" />
+              <AntDesign name="sharealt" size={25} color="black" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => confirmDelete(fileUri)}>
-              <AntDesign name="delete" size={26} color="black" />
+              <AntDesign name="delete" size={25} color="black" />
             </TouchableOpacity>
             {item.format === "bin" && (
               <TouchableOpacity onPress={() => handleFileInfo(fileUri)}>
-                <AntDesign name="infocirlceo" size={26} color="black" />
+                <AntDesign name="infocirlceo" size={25} color="black" />
               </TouchableOpacity>
             )}
           </View>
