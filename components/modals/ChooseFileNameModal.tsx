@@ -83,7 +83,7 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
               <View className="flex flex-row justify-center items-center gap-x-4 mt-8">
                 <View>
                   <CustomButton
-                    title="Cancel"
+                    title="Discard"
                     onPress={handleDiscard}
                     disabled={isLoading}
                   />
