@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import CustomButton from "../../components/CustomButton";
+import CustomButton from "@/components/CustomButton";
 import {
   SafeAreaView,
   Text,
@@ -7,8 +7,8 @@ import {
   View,
   ScrollView,
 } from "react-native";
-import DeviceModal from "../../components/modals/DeviceConnectionModal";
-import useBLE from "../../utils/useBLE";
+import DeviceModal from "@/components/modals/DeviceConnectionModal";
+import useBLE from "@/utils/useBLE";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import SignalQuality from "@/components/SignalQuality";
 import ToastMessages from "@/components/ToastMessages";
@@ -31,12 +31,10 @@ export default function index() {
     packetLossData,
   } = useBLE(isRecordingRef);
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isDeviceModalVisible, setIsDeviceModalVisible] =
+    useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false); // Loading state for toggling data streaming
   const [isRecordingPaused, setIsRecordingPaused] = useState<boolean>(false); // User paused the data streaming and need to decide what to do with saved data
-  useEffect(() => {
-    console.log("isRecordingpaused", isRecordingPaused);
-  }, [isRecordingPaused]);
   const scanForDevices = useCallback(async () => {
     const isPermissionsEnabled = await requestPermissions();
     console.log("isPermissionsEnabled", isPermissionsEnabled);
@@ -46,12 +44,12 @@ export default function index() {
   }, [requestPermissions, scanForPeripherals]);
 
   const hideModal = useCallback(() => {
-    setIsModalVisible(false);
+    setIsDeviceModalVisible(false);
   }, []);
 
   const openModal = useCallback(async () => {
     scanForDevices();
-    setIsModalVisible(true);
+    setIsDeviceModalVisible(true);
   }, [scanForDevices]);
 
   const handleDataStreamingToggle = useCallback(
@@ -130,7 +128,7 @@ export default function index() {
 
         <DeviceModal
           closeModal={hideModal}
-          visible={isModalVisible}
+          visible={isDeviceModalVisible}
           connectToPeripheral={handleConnectToDevice}
           devices={allDevices}
         />
