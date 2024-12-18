@@ -38,7 +38,7 @@ const SignalQuality: React.FC<SignalQualityProps> = ({
           <View className="mt-4 flex flex-row justify-between items-center gap-x-3 ">
             <View className="flex flex-row justify-center items-center">
               <Text className="text-base text-success-color">
-                Data is being transfered...
+                Data is being transferred...
               </Text>
               <View className="ml-4">
                 <PulsingRings />
