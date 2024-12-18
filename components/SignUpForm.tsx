@@ -28,9 +28,9 @@ export default function SignUpForm({ onSignUpSuccess }: SignUpFormProps) {
       setLoading(false);
       Alert.alert("Success", "Account created successfully.");
       onSignUpSuccess();
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      Alert.alert("Sign up Failed", "Invalid email or password.");
+      Alert.alert("Sign up Failed", error.message);
     }
   };
 

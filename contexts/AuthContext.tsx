@@ -106,12 +106,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await SecureStore.setItemAsync("userToken", token); //Access token
         await SecureStore.setItemAsync("refreshToken", refreshToken); // Refresh token
       } else {
-        console.log("Login failed, missing token or refresh token");
+        console.log("Login failed, missing token/refresh token");
         throw new Error("Login failed. please try again.");
       }
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      throw error;
+    } catch (error: any) {
+      if (error.code === "auth/user-not-found") {
+        throw new Error(
+          "No user found with this email. Please check and try again."
+        );
+      } else if (error.code === "auth/wrong-password") {
+        throw new Error("Invalid password. Please try again.");
+      } else if (error.code === "auth/invalid-email") {
+        throw new Error(
+          "The email address is not valid. Please check and try again."
+        );
+      } else if (error.code === "auth/user-disabled") {
+        throw new Error(
+          "This account has been disabled. Contact support for help."
+        );
+      } else {
+        throw new Error(
+          "An unexpected error occurred. Please try again later."
+        );
+      }
     }
   };
 
@@ -122,8 +139,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setToken(token);
         await SecureStore.setItemAsync("userToken", token);
       }
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      if (error.code === "auth/invalid-email") {
+        throw new Error(
+          "The email address is not valid. Please check and try again."
+        );
+      } else if (error.code === "auth/weak-password") {
+        throw new Error(
+          "The password is too weak. Please choose a stronger password."
+        );
+      } else if (error.code === "auth/email-already-in-use") {
+        throw new Error(
+          "This email is already in use. Please use a different email."
+        );
+      } else {
+        throw new Error(
+          "An unexpected error occurred. Please try again later."
+        );
+      }
     }
   };
 

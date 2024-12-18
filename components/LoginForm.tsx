@@ -23,9 +23,9 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
       await signIn(email, password); // No need to handle token here, AuthContext will do it.
       setLoading(false);
       onLoginSuccess();
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      Alert.alert("Login Failed", "Invalid email or password.");
+      Alert.alert("Login Failed", error.message);
     }
   };
 
