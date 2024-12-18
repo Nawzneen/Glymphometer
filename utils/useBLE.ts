@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 import { requestPermissions } from "@/utils/requestPermissions";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "@/utils/bleConnection";
-import { clearDataBuffer } from "@/utils/dataBuffer";
+import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
 import { DATA_SERVICE_UUID } from "@/utils/bleConstants";
 import { adjustLEDLevel } from "@/utils/bleAdjustLEDLevel";
 import { BleError, Device, Subscription } from "react-native-ble-plx";
@@ -14,6 +14,7 @@ import {
 import bleManager from "@/utils/bleManager";
 import { Alert } from "react-native";
 import { Buffer } from "buffer";
+import { saveDataToFile } from "./saveData";
 
 if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
@@ -156,7 +157,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     let disconnectSubscription: Subscription | undefined;
     if (connectedDevice) {
       disconnectSubscription = connectedDevice.onDisconnected(
-        (error, device) => {
+        async (error, device) => {
           if (dataSubscription.current) {
             console.log(
               "removing data subscription",
@@ -165,8 +166,31 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
-          clearDataBuffer(); // Clear the data buffer when device disconnected
-          setConnectedDevice(null);
+          if (isRecordingRef.current) {
+            try {
+              const dataBuffer = getDataBuffer();
+              await saveDataToFile(dataBuffer, "AutoSave");
+              Toast.show({
+                type: "success",
+                text1: "Auto-Save Complete",
+                text2: "Data saved successfully after disconnection.",
+                position: "top",
+              });
+            } catch (error) {
+              Toast.show({
+                type: "error",
+                text1: "Auto-Save Failed",
+                text2: "An error occurred while saving data.",
+                position: "top",
+              });
+            } finally {
+              clearDataBuffer(); // Clear the data buffer when device disconnected
+              setConnectedDevice(null);
+            }
+          } else {
+            clearDataBuffer(); // Clear the data buffer when device disconnected
+            setConnectedDevice(null);
+          }
 
           Toast.show({
             type: "success",
