@@ -1,4 +1,4 @@
-package com.wa2goose.BLEExpoBlog
+package com.freelancers.glympholink
 
 import android.os.Build
 import android.os.Bundle
