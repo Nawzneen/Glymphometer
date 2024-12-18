@@ -230,7 +230,6 @@ const processPacket = (packet: number[], packetStats: PacketStats): void => {
   // Initialize first packet number
   if (packetStats.firstPacketNumber === null) {
     packetStats.firstPacketNumber = packetNumber;
-    console.log("first packet number is", packetNumber);
   }
 
   // Update last packet number

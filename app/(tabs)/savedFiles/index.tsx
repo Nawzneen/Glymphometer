@@ -47,10 +47,6 @@ const SavedFiles = () => {
     useState<boolean>(false);
   const [selectedFiles, setSelectedFiles] = useState<object[]>([]);
 
-  useEffect(() => {
-    console.log("Token in SavedFiles:", token);
-    // Perform any actions when token changes (e.g., fetch files)
-  }, [token]);
   const fetchFiles = useCallback(async () => {
     try {
       await createFolder(); // if the folder already exist, it will continue to other parts of the code

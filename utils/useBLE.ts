@@ -54,7 +54,6 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
 
   const calculatePacketLoss = () => {
     const packetStats = packetStatsRef.current;
-    console.log("packetStats", packetStats);
     if (
       packetStats.firstPacketNumber !== null &&
       packetStats.lastPacketNumber !== null &&
@@ -70,7 +69,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
         (packetLoss / expectedPackets) *
         100
       ).toFixed(2);
-      console.log("Packet Loss:", packetLoss, packetLossPercentage);
+      // console.log("Packet Loss:", packetLoss, packetLossPercentage);
       // Update State
       setPacketLossData({ packetLoss, packetLossPercentage });
       //Reset oacjet stats for the next interval
@@ -112,7 +111,6 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
     if (isDataStreaming) {
       // Start the packet loss timer
       packetLossTimerRef.current = setInterval(() => {
-        console.log("5 second passed");
         calculatePacketLoss();
       }, 10000); // 10 seconds
     } else {
@@ -159,10 +157,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
       disconnectSubscription = connectedDevice.onDisconnected(
         async (error, device) => {
           if (dataSubscription.current) {
-            console.log(
-              "removing data subscription",
-              typeof dataSubscription.current
-            );
+            console.log("removing data subscription");
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
@@ -280,7 +275,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
       await handleToggleDataStreaming("P");
       Alert.alert(
         "Disconect Device",
-        "Are you sure you want to disconnect? You will lose the recording data.",
+        "Are you sure you want to disconnect? If you are recording, you will lose the data.",
         [
           { text: "Cancel", style: "cancel", onPress: () => {} },
           {

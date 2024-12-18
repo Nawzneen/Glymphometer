@@ -14,7 +14,6 @@ export const saveDataToFile = async (
 ) => {
   try {
     const date = formatDate();
-    // console.log(formatDate());
     const uint8Array = new Uint8Array(dataBuffer);
     const base64Data = Buffer.from(uint8Array).toString("base64");
     const folderUri = await createFolder();

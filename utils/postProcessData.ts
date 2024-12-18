@@ -141,7 +141,7 @@ export const postProcessData = async (fileUri: string) => {
     packetNumbersSet,
   } = processPackets(Uint8ArrayData, PACKET_SIZE);
 
-  console.log(`${totalPackets} totalPacketsNumber`);
+  // console.log(`${totalPackets} totalPacketsNumber`);
 
   if (firstPacketNumber === null || lastPacketNumber === null) {
     console.error("Could not determine first or last packet number.");
@@ -163,16 +163,16 @@ export const postProcessData = async (fileUri: string) => {
   const { duration } = calculateDuration(expectedPacketsNumber);
 
   // Output results
-  console.log(`First Packet Number: ${firstPacketNumber}`);
-  console.log(`Last Packet Number: ${lastPacketNumber}`);
-  console.log(`Total Duplicate Packets: ${duplicatePackets}`);
-  console.log(`Expected Packets: ${expectedPacketsNumber}`);
-  console.log(`Actual Packets Received: ${packetNumbersSet.size}`);
-  console.log(`Packets Lost: ${packetLoss}`);
-  console.log(
-    `Packet Loss Percentage: ${packetLossPercentage}%`,
-    typeof packetLossPercentage
-  );
+  // console.log(`First Packet Number: ${firstPacketNumber}`);
+  // console.log(`Last Packet Number: ${lastPacketNumber}`);
+  // console.log(`Total Duplicate Packets: ${duplicatePackets}`);
+  // console.log(`Expected Packets: ${expectedPacketsNumber}`);
+  // console.log(`Actual Packets Received: ${packetNumbersSet.size}`);
+  // console.log(`Packets Lost: ${packetLoss}`);
+  // console.log(
+  //   `Packet Loss Percentage: ${packetLossPercentage}%`,
+  //   typeof packetLossPercentage
+  // );
 
   return {
     packetsNumbre: packetNumbersSet.size, // Total packets processed without duplicates

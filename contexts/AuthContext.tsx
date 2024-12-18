@@ -36,11 +36,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const storedToken = await SecureStore.getItemAsync("userToken");
         const storedRefreshToken =
           await SecureStore.getItemAsync("refreshToken");
-        console.log(
-          "storedToken & refresh token in authContext is",
-          storedToken,
-          storedRefreshToken
-        );
         if (storedToken) {
           const expired = await isTokenExpired(storedToken);
           if (!expired) {
@@ -100,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (email: string, password: string) => {
     try {
       const { token, refreshToken } = await loginAndGetToken(email, password);
-      console.log("token from signIn", token);
       if (token && refreshToken) {
         setToken(token);
         await SecureStore.setItemAsync("userToken", token); //Access token

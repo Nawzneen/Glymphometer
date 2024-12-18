@@ -13,7 +13,6 @@ const AdjustLEDLevel: FC<AdjustLEDLevelProps> = ({
   isDataStreaming,
   isRecording,
 }) => {
-  console.log("is recording?", isRecording);
   const [LEDLevel, setLEDLevel] = useState<number>(3);
   // const steps = Array.from({ length: 10 }, (_, i) => i); // [0,1,2,...,9]
   useEffect(() => {

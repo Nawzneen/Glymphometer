@@ -12,7 +12,6 @@ jest.mock("expo-file-system", () => ({
 }));
 import { saveDataToFile, createFolder } from "@/utils/saveData";
 import * as FileSystem from "expo-file-system";
-console.log("tttttttttttt", FileSystem.documentDirectory); // Should log: "file://mockDocumentDirectory/"
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";
 

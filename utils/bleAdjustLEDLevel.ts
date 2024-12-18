@@ -7,7 +7,6 @@ export const adjustLEDLevel = async (
   connectedDevice: Device
 ) => {
   // Default value of the LED light is 3
-  console.log("adjustLEDLevel is running");
 
   if (!/^[0-9]$/.test(value)) {
     throw new Error(
@@ -25,7 +24,6 @@ export const adjustLEDLevel = async (
       RX_CHARACTERISTIC_UUID,
       base64Command
     );
-    console.log("LED level adjusted to", value);
   } catch (error) {
     console.log("Error adjusting LED level:", error);
   }

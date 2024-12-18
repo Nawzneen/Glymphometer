@@ -67,17 +67,17 @@ const UploadModal: React.FC<UploadModalProps> = ({
         // const localUri = asset.localUri || asset.uri;
 
         const metadataResponseArray = await uploadFileMetadata(fileData, token);
-        console.log(
-          "Metadata response array for file:",
-          file.name,
-          metadataResponseArray
-        );
+        // console.log(
+        //   "Metadata response array for file:",
+        //   file.name,
+        //   metadataResponseArray
+        // );
 
         const metadataResponse = metadataResponseArray[0];
-        console.log(
-          "metadataResponseeeeeeeeeeeeeeeeeeeeeeee",
-          metadataResponse
-        );
+        // console.log(
+        //   "metadataResponseeeeeeeeeeeeeeeeeeeeeeee",
+        //   metadataResponse
+        // );
         metadataResponses.push({
           uri: file.uri,
           metadataResponse,
