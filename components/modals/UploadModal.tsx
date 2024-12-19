@@ -27,10 +27,11 @@ const UploadModal: React.FC<UploadModalProps> = ({
     country: "",
     description: "",
   });
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleDiscard = () => {
     setIsModalVisible(false); // Close the modal
+    setIsLoading(false); // Reset the loading state
     // Reset the dataset details
     setDatasetDetails({
       created: new Date().toISOString(),
@@ -39,7 +40,6 @@ const UploadModal: React.FC<UploadModalProps> = ({
     });
   };
   const handleUploadFiles = async () => {
-    setIsloading(true);
     if (!datasetDetails.country.trim()) {
       Alert.alert("Error", "Country is a required field.");
       return;
@@ -48,6 +48,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
       Alert.alert("Error", "Please log in to upload files.");
       return;
     }
+    setIsLoading(true);
 
     try {
       const datasetResponse = await uploadDataset(datasetDetails, token); // calling function in apiService.js
@@ -60,24 +61,9 @@ const UploadModal: React.FC<UploadModalProps> = ({
           format: file.format || "txt",
           datasetId,
         };
-        // const localUri = file.uri;
-        // // Resolve the URI using Asset
-        // const asset = Asset.fromModule(file.uri); // `file.uri` is the require() statement
-        // await asset.downloadAsync(); // Ensure the file is available locally
-        // const localUri = asset.localUri || asset.uri;
 
         const metadataResponseArray = await uploadFileMetadata(fileData, token);
-        // console.log(
-        //   "Metadata response array for file:",
-        //   file.name,
-        //   metadataResponseArray
-        // );
-
         const metadataResponse = metadataResponseArray[0];
-        // console.log(
-        //   "metadataResponseeeeeeeeeeeeeeeeeeeeeeee",
-        //   metadataResponse
-        // );
         metadataResponses.push({
           uri: file.uri,
           metadataResponse,
@@ -85,12 +71,10 @@ const UploadModal: React.FC<UploadModalProps> = ({
       }
 
       for (const { uri, metadataResponse } of metadataResponses) {
-        //console.log("Resolved URI:", uri);
         const fileId = metadataResponse.id;
-        //console.log(`Uploading file content for ID: ${fileId}`);
         await uploadFileContent(uri, fileId, token);
       }
-      Alert.alert("Success", "Files and data uploaded successfully.");
+      Alert.alert("Success", "Data uploaded successfully.");
       setSelectedFiles([]);
       // Reset the dataset details
       setDatasetDetails({
@@ -98,33 +82,13 @@ const UploadModal: React.FC<UploadModalProps> = ({
         country: "",
         description: "",
       });
-    } catch (error: any) {
-      console.error(error);
-
-      // Extract error details
-      let status = "Unknown";
-      let message = "An error occurred";
-
-      if (error.response) {
-        status = error.response.status || status;
-        message = error.response.data?.message || error.message || message;
-      } else if (error.message) {
-        const match = error.message.match(/Status: (\d+)\s-\s(.+)/);
-        if (match) {
-          status = match[1];
-          message = match[2];
-        } else {
-          message = error.message;
-        }
-      }
-      Alert.alert(
-        "Error Uploading Files",
-        `Status: ${status}\nMessage: ${message}`
-      );
-      console.error(error);
-    } finally {
       setIsModalVisible(false);
-      setIsloading(false);
+    } catch (error: any) {
+      // console.error("Error occurred during file upload:", error);
+      const message = error?.message || "An unknown error occurred.";
+      Alert.alert("Error Uploading Files", message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -148,7 +112,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             <DataEntryForm
               datasetDetails={datasetDetails}
               isLoading={isLoading}
-              setIsloading={setIsloading}
+              setIsLoading={setIsLoading}
               onDatasetChange={(field, value) =>
                 setDatasetDetails({ ...datasetDetails, [field]: value })
               }
