@@ -13,7 +13,7 @@ interface DataEntryFormProps {
   onDatasetChange: (field: keyof DatasetDetails, value: string) => void;
   handleUploadFiles: () => void;
   isLoading: boolean;
-  setIsloading: Dispatch<SetStateAction<boolean>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function DataEntryForm({
@@ -21,7 +21,7 @@ export default function DataEntryForm({
   onDatasetChange,
   handleUploadFiles,
   isLoading,
-  setIsloading,
+  setIsLoading,
 }: DataEntryFormProps) {
   return (
     <View className="mt-8 mx-auto w-[90%]">
@@ -45,7 +45,6 @@ export default function DataEntryForm({
           title={isLoading ? "Uploading..." : "Upload"}
           onPress={() => {
             handleUploadFiles();
-            setIsloading(true);
           }}
           disabled={isLoading}
         />
