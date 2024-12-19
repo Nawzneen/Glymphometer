@@ -8,7 +8,6 @@ import {
   TextInput,
 } from "react-native";
 import CustomButton from "@/components/CustomButton";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { Keyboard } from "react-native";
 interface ChooseFileNameModalProps {
   visible: boolean;
@@ -86,6 +85,7 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
                     title="Discard"
                     onPress={handleDiscard}
                     disabled={isLoading}
+                    customButtonStyle={{ backgroundColor: "#8b0000" }}
                   />
                 </View>
                 <View>
@@ -95,13 +95,6 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
                     disabled={isLoading}
                   />
                 </View>
-                {/* 
-                <TouchableOpacity onPress={handleDiscard}>
-                  <AntDesign name="closecircleo" size={40} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleSave}>
-                  <AntDesign name="checkcircleo" size={40} color="black" />
-                </TouchableOpacity> */}
               </View>
             </View>
           </SafeAreaView>

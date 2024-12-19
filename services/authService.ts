@@ -47,7 +47,6 @@ export async function loginAndGetToken(email: string, password: string) {
     );
     const token = await getIdToken(userCredential.user); //Access token
     const refreshToken = userCredential.user.refreshToken; //Refresh token from firebase
-    console.log("Successfully logged in. Token:", token);
     return { token, refreshToken };
   } catch (error: any) {
     console.log("Error during login:", error.message);
