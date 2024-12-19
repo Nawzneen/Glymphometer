@@ -105,23 +105,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (error: any) {
       if (error.code === "auth/user-not-found") {
+        // doesnt throw this error in the service function
         throw new Error(
           "No user found with this email. Please check and try again."
         );
       } else if (error.code === "auth/wrong-password") {
+        // doesnt throw this error in the service function
         throw new Error("Invalid password. Please try again.");
-      } else if (error.code === "auth/invalid-email") {
+      } else if (error.code === "auth/invalid-credential") {
         throw new Error(
-          "The email address is not valid. Please check and try again."
+          "The email address or password is not valid. Please check and try again."
         );
       } else if (error.code === "auth/user-disabled") {
+        // // does it throw this error in the service function?
         throw new Error(
           "This account has been disabled. Contact support for help."
         );
-      } else {
+      } else if (error.code === "auth/invalid-email") {
+        //
         throw new Error(
-          "An unexpected error occurred. Please try again later."
+          "The email address is not valid. Please check and try again."
         );
+      } else {
+        throw new Error(`An unexpected error occurred, ${error}`);
       }
     }
   };
