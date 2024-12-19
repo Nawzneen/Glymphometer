@@ -9,6 +9,11 @@
       "distribution": "internal"
     },
     "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview1": {
       "distribution": "internal"
     },
     "production": {
