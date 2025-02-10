@@ -32,9 +32,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
-        <data android:scheme="com.wa2goose.BLEExpoBlog"/>
-        <data android:scheme="exp+glymphometer"/>
         <data android:scheme="com.freelancers.glympholink"/>
+        <data android:scheme="exp+glymphometer"/>
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
