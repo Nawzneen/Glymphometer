@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import CustomButton from "@/components/CustomButton";
+import { Command } from "@/constants/Constants";
 import {
   SafeAreaView,
   Text,
@@ -57,7 +58,7 @@ export default function index() {
       if (isLoading || isRecordingPaused) return; //prevent multiple roggles when paused or on loading state
       setIsLoading(true);
       if (connectedDevice) {
-        await handleToggleDataStreaming(value ? "S" : "P");
+        await handleToggleDataStreaming(value ? Command.START : Command.PAUSE);
       }
       setIsLoading(false);
     },

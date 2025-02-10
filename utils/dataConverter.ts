@@ -1,3 +1,4 @@
+import { PacketNumber } from "@/constants/Constants";
 interface ConversionResult {
   outputText: string;
   missed: number;
@@ -22,7 +23,7 @@ export default function convertData(buffer: Uint8Array): ConversionResult {
     const chunk = buffer.subarray(offset, offset + packetSize);
 
     // Extract the package number
-    const packagenumber = (chunk[505] << 8) | chunk[506];
+    const packagenumber = (chunk[PacketNumber.HIGHBYTE] << 8) | chunk[PacketNumber.LOWBYTE];
 
     if (first === 0) {
       last_packagenumber = packagenumber - 1;

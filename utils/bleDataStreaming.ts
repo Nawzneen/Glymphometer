@@ -6,6 +6,7 @@ import {
   Device,
 } from "react-native-ble-plx";
 import { Dispatch, SetStateAction, MutableRefObject } from "react";
+import { Command, START_MARKER, END_MARKER, PacketNumber } from "@/constants/Constants";
 import { handleError } from "@/utils/handleError";
 import Toast from "react-native-toast-message";
 import base64 from "react-native-base64";
@@ -38,7 +39,7 @@ export const toggleDataStreaming =
     packetStats: PacketStats
   ): Promise<void> => {
     console.log("toogle data", command);
-    const status = command === "S" ? "Start" : "Paus";
+    const status = command === Command.START ? "Start" : "Paus";
     if (!connectedDevice) {
       Toast.show({
         type: "error",
@@ -51,16 +52,16 @@ export const toggleDataStreaming =
 
     // Prevent duplicate actions/toggles
     if (
-      (command === "S" && isDataStreaming) ||
-      (command === "P" && !isDataStreaming)
+      (command === Command.START && isDataStreaming) ||
+      (command === Command.PAUSE && !isDataStreaming)
     ) {
       Toast.show({
         type: "error",
         text1: `Data Streaming Already ${
-          command === "S" ? "Started" : "Paused"
+          command === Command.START ? "Started" : "Paused"
         }`,
         text2: `Cannot ${
-          command === "S" ? "Start" : "Pause"
+          command === Command.START ? "Start" : "Pause"
         } again without toggling.`,
         position: "bottom",
       });
@@ -74,7 +75,7 @@ export const toggleDataStreaming =
         RX_CHARACTERISTIC_UUID,
         base64Command
       );
-      if (command === "S") {
+      if (command === Command.START) {
         startDataStreaming(
           connectedDevice,
           dataSubscription,
@@ -82,7 +83,7 @@ export const toggleDataStreaming =
           setIsDataStreaming,
           packetStats
         ); // Start data streaming
-      } else if (command === "P") {
+      } else if (command === Command.PAUSE) {
         // Stop data streaming and remove listener
         if (dataSubscription.current) {
           console.log("datasubsccription removed when paused");
@@ -90,7 +91,7 @@ export const toggleDataStreaming =
           dataSubscription.current = null;
         }
       }
-      setIsDataStreaming(command === "S"); //set true if command is S, set false if command is p
+      setIsDataStreaming(command === Command.START); //set true if command is S, set false if command is p
       Toast.show({
         type: "success",
         text1: `Data Streaming ${status}ed`,
@@ -202,20 +203,19 @@ export const onDataUpdate =
     }
   };
 ////
-const START_MARKER = 83; // 'S' in ASCII
-const END_MARKER = 69; // 'E' in ASCII
+
 
 const validatePacketMarkers = (packet: number[]): boolean => {
   return (
     packet[0] === START_MARKER &&
-    packet[1] === START_MARKER &&
-    packet[507] === END_MARKER &&
+    // packet[1] === START_MARKER &&
+    // packet[507] === END_MARKER &&
     packet[508] === END_MARKER
   );
 };
 
 const extractPacketNumber = (packet: number[]): number => {
-  return (packet[505] << 8) | packet[506];
+  return (packet[PacketNumber.HIGHBYTE] << 8) | packet[PacketNumber.LOWBYTE];
 };
 
 const processPacket = (packet: number[], packetStats: PacketStats): void => {

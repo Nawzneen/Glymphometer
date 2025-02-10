@@ -15,6 +15,7 @@ import bleManager from "@/utils/bleManager";
 import { Alert } from "react-native";
 import { Buffer } from "buffer";
 import { saveDataToFile } from "./saveData";
+import { Command } from "@/constants/Constants";
 
 if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
@@ -272,7 +273,7 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
   const handleDisconnectDevice = async () => {
     if (connectedDevice) {
       // Data streaming and Recording will be paused before disconnecting
-      await handleToggleDataStreaming("P");
+      await handleToggleDataStreaming(Command.PAUSE);
       Alert.alert(
         "Disconect Device",
         "Are you sure you want to disconnect? If you are recording, you will lose the data.",

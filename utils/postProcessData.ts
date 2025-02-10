@@ -1,5 +1,5 @@
 import * as FileSystem from "expo-file-system";
-
+import { PacketNumber, START_MARKER, END_MARKER, PACKET_SIZE } from "@/constants/Constants";
 // Function to read binary data from a file
 const readBinaryDataFromFile = async (
   fileUri: string
@@ -21,12 +21,11 @@ const validatePacketMarkers = (
   packet: Uint8Array,
   packetIndex: number
 ): boolean => {
-  const START_MARKER = 83; // 'S' in ASCII
-  const END_MARKER = 69; // 'E' in ASCII
+  
   if (
     packet[0] !== START_MARKER ||
-    packet[1] !== START_MARKER ||
-    packet[507] !== END_MARKER ||
+    // packet[1] !== START_MARKER ||
+    // packet[507] !== END_MARKER ||
     packet[508] !== END_MARKER
   ) {
     console.error(`Packet ${packetIndex} has invalid start/end markers.`);
@@ -37,7 +36,7 @@ const validatePacketMarkers = (
 
 // Function to extract the packet number from a packet
 const extractPacketNumber = (packet: Uint8Array): number => {
-  return (packet[505] << 8) | packet[506];
+  return (packet[PacketNumber.HIGHBYTE] << 8) | packet[PacketNumber.LOWBYTE];
 };
 
 // Function to process all packets and collect necessary data
@@ -124,7 +123,7 @@ export const postProcessData = async (fileUri: string) => {
   const Uint8ArrayData = await readBinaryDataFromFile(fileUri);
   if (!Uint8ArrayData) return;
 
-  const PACKET_SIZE = 509;
+ 
 
   // Check for extra data
   if (Uint8ArrayData.length % PACKET_SIZE !== 0) {

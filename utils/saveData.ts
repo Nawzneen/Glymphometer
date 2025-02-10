@@ -15,6 +15,7 @@ export const saveDataToFile = async (
   try {
     const date = formatDate();
     const uint8Array = new Uint8Array(dataBuffer);
+    // SAVE BIN FORMAT 
     const base64Data = Buffer.from(uint8Array).toString("base64");
     const folderUri = await createFolder();
     const sanitizedFileName = sanitizeFilename(fileName);
@@ -23,12 +24,12 @@ export const saveDataToFile = async (
     await FileSystem.writeAsStringAsync(binFileUri, base64Data, {
       encoding: FileSystem.EncodingType.Base64,
     });
-
-    const { outputText } = convertData(uint8Array);
-    const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
-    await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
+    // SAVE TEXT FORMAT  // OUTPUT TXT SHOULD BE CHANGED FOR NEW PROTOCOL
+    // const { outputText } = convertData(uint8Array);
+    // const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
+    // await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
+    //   encoding: FileSystem.EncodingType.UTF8,
+    // });
 
     Toast.show({
       type: "success",
