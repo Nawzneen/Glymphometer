@@ -11,7 +11,7 @@ import {
 import DeviceModal from "@/components/modals/DeviceConnectionModal";
 import useBLE from "@/utils/useBLE";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import SignalQuality from "@/components/SignalQuality";
+import DataStreaming from "@/components/DataStreaming";
 import ToastMessages from "@/components/ToastMessages";
 import Record from "@/components/Record";
 import AdjustLEDLevel from "@/components/AdjustLEDLevel";
@@ -98,7 +98,7 @@ export default function index() {
                 </TouchableOpacity>
               </View>
 
-              <SignalQuality
+              <DataStreaming
                 isDataStreaming={isDataStreaming}
                 onToggleDataStreaming={handleDataStreamingToggle}
                 isLoading={isLoading}
