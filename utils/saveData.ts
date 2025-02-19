@@ -2,7 +2,8 @@ import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";
-import convertData from "@/utils/dataConverter";
+// import convertData from "@/utils/dataConverter"; Protocol 2
+import convertData from "@/utils/dataConverterV3"; // Protocol 3
 
 // Function to sanitize the file name
 const sanitizeFilename = (fileName: string): string => {
@@ -25,11 +26,11 @@ export const saveDataToFile = async (
       encoding: FileSystem.EncodingType.Base64,
     });
     // SAVE TEXT FORMAT  // OUTPUT TXT SHOULD BE CHANGED FOR NEW PROTOCOL
-    // const { outputText } = convertData(uint8Array);
-    // const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
-    // await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
-    //   encoding: FileSystem.EncodingType.UTF8,
-    // });
+    const { outputText } = convertData(uint8Array);
+    const txtFileUri = folderUri + `${sanitizedFileName}_${date}.txt`;
+    await FileSystem.writeAsStringAsync(txtFileUri, outputText, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
 
     Toast.show({
       type: "success",
@@ -68,6 +69,6 @@ function formatDate() {
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const seconds = String(date.getSeconds()).padStart(2, "0");
 
-  const formattedDate = `${day}.${month}.${year}.${hours}.${minutes}.${seconds}`;
+  const formattedDate = `${year}${month}${day}_${hours}${minutes}${seconds}`;
   return formattedDate;
 }
