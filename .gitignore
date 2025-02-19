@@ -9,7 +9,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-# android/
+android/
 
 # macOS
 .DS_Store
@@ -27,3 +27,4 @@ assets/textFiles/*
 
 utils/saveManually.ts
 
+dataConverterV3.ts
