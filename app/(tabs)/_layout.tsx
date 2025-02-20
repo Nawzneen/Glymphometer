@@ -40,10 +40,10 @@ export default function TabLayout() {
             ),
           }}
         />
-        {/* <Tabs.Screen
-          name="results"
+        <Tabs.Screen
+          name="signalQuality"
           options={{
-            title: "Results",
+            title: "SQA",
             tabBarIcon: ({ color, focused }) => (
               <TabBarIcon
                 name={focused ? "code-slash" : "code-slash-outline"}
@@ -51,7 +51,7 @@ export default function TabLayout() {
               />
             ),
           }}
-        /> */}
+        />
         <Tabs.Screen
           name="savedFiles"
           options={{
