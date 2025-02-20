@@ -68,16 +68,18 @@ export default function index() {
   return (
     <SafeAreaView className="flex flex-1 bg-background-color">
       <ScrollView className="flex-gow">
-        <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
-          <View>
-            <CustomButton title="Connect to GM5" onPress={openModal} />
+        {!connectedDevice && (
+          <View className="mt-4 flex flex-row gap-x-2 items-center justify-center  ">
+            <View>
+              <CustomButton title="Connect to GM5" onPress={openModal} />
+            </View>
           </View>
-        </View>
+        )}
 
         <View className="">
           {connectedDevice ? (
             <>
-              <View className="mt-8 flex-row flex gap-x-1 justify-center items-center">
+              <View className="mt-4 flex-row flex gap-x-1 justify-center items-center">
                 <Text className="text-xl font-bold text-primary-color">
                   {connectedDevice.name} is{" "}
                   {connectedDevice ? "Connected" : "Disconnected"}
