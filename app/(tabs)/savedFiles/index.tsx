@@ -22,7 +22,7 @@ import CustomButton from "@/components/CustomButton";
 import { AuthContext } from "@/contexts/AuthContext";
 import UploadModal from "@/components/modals/UploadModal";
 import CheckBox from "@react-native-community/checkbox";
-import { saveManually } from "@/utils/saveManually";
+// import { saveManually } from "@/utils/saveManually";
 
 interface FileType {
   name: string;
