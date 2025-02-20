@@ -3,7 +3,7 @@ import { Buffer } from "buffer";
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";
 // import convertData from "@/utils/dataConverter"; Protocol 2
-import convertData from "@/utils/dataConverterV3"; // Protocol 3
+import convertData from "@/utils/data/dataConverterV3"; // Protocol 3
 
 // Function to sanitize the file name
 const sanitizeFilename = (fileName: string): string => {
@@ -16,7 +16,7 @@ export const saveDataToFile = async (
   try {
     const date = formatDate();
     const uint8Array = new Uint8Array(dataBuffer);
-    // SAVE BIN FORMAT 
+    // SAVE BIN FORMAT
     const base64Data = Buffer.from(uint8Array).toString("base64");
     const folderUri = await createFolder();
     const sanitizedFileName = sanitizeFilename(fileName);

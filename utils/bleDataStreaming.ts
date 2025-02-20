@@ -6,7 +6,12 @@ import {
   Device,
 } from "react-native-ble-plx";
 import { Dispatch, SetStateAction, MutableRefObject } from "react";
-import { Command, START_MARKER, END_MARKER, PacketNumber } from "@/constants/Constants";
+import {
+  Command,
+  START_MARKER,
+  END_MARKER,
+  PacketNumber,
+} from "@/constants/Constants";
 import { handleError } from "@/utils/handleError";
 import Toast from "react-native-toast-message";
 import base64 from "react-native-base64";
@@ -17,6 +22,7 @@ import {
 } from "@/utils/bleConstants";
 
 import { addToDataBuffer } from "@/utils/dataBuffer";
+import extractNirsData from "@/utils/data/nirsExtractor";
 
 type PacketStats = {
   receivedPacketNumbers: Set<number>;
@@ -183,10 +189,10 @@ export const onDataUpdate =
         const encodedData = characteristic.value;
         // Decode the Base64 string to a byte array
         const decodedData = base64.decode(encodedData);
-
         const byteArray = Array.from(decodedData, (char) => char.charCodeAt(0));
-
         // this is decimal values of each paceket [83,83,...,69,69]
+
+        extractNirsData(byteArray); // Extract NIRS data for each packet
 
         // Process the packet (now only for for packet loss)
         processPacket(byteArray, packetStats);
@@ -203,7 +209,6 @@ export const onDataUpdate =
     }
   };
 ////
-
 
 const validatePacketMarkers = (packet: number[]): boolean => {
   return (
@@ -234,7 +239,7 @@ const processPacket = (packet: number[], packetStats: PacketStats): void => {
 
   // Update last packet number
   packetStats.lastPacketNumber = packetNumber;
-  console.log("last packet number is", packetNumber);
+  // console.log("last packet number is", packetNumber);
 
   // Check for duplicates
   if (packetStats.receivedPacketNumbers.has(packetNumber)) {
