@@ -1,22 +1,37 @@
 import { FC, useEffect, useState } from "react";
 import { View, SafeAreaView, Text, StyleSheet } from "react-native";
+import { runSQA } from "@/utils/signalQaulityAnalysis/SQA";
+import { getNirsData } from "@/utils/data/nirsDataBuffer";
 const signalQuality: FC = () => {
   const [wavelengths, setWavelengths] = useState<number[][]>(
     Array(3).fill(Array(4).fill(0))
   );
+  const [sqaScore, setSqaScore] = useState<number[]>(Array(12).fill(0));
 
-  // Update every second
+  // A pointer for the start of the SQA window
+  const [sqaStartIndex, setSqaStartIndex] = useState<number>(0);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setWavelengths(
-        wavelengths.map((channel) =>
-          channel.map(() => (Math.random() > 0.5 ? 1 : 0))
-        )
-      );
-    }, 1000);
-
+      console.log("internal running");
+      const length = getNirsData()[0][0].length;
+      if (length >= 2500) {
+        // For “last 2500 samples”
+        console.log("more than 2500");
+        const startIndex = length - 2500;
+        const currentScores = runSQA(startIndex);
+        setSqaScore(currentScores);
+      }
+    }, 20000);
+    // console.log("signal quality useeffect running");
+    // const nirsLength = getNirsData()[0][0].length;
+    // if (nirsLength >= sqaStartIndex + 2500) {
+    //   const currentScores = runSQA(sqaStartIndex);
+    //   setSqaScore(currentScores);
+    //   setSqaStartIndex((prev) => prev + 250);
+    // }
     return () => clearInterval(interval);
-  }, [wavelengths]);
+  }, [sqaStartIndex]);
   return (
     <SafeAreaView className="flex-1">
       <View className="py-4 flex flex-row justify-center items-center gap-x-2 bg-primary-color">
@@ -63,21 +78,21 @@ const signalQuality: FC = () => {
           </View>
         </View>
       ))}
-      {/* </View>
-          </View>
-        ))} */}
-      {/* </View> */}
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10, backgroundColor: "#f0f0f0" },
-  channel: { marginBottom: 20 },
-  channelTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
-  wavelengthRow: { flexDirection: "row", gap: 10 },
-  wavelengthContainer: { flexDirection: "column", alignItems: "center" },
-  colorBlock: { width: 40, height: 40, marginVertical: 2, borderRadius: 4 },
-});
-
 export default signalQuality;
+
+// Update every second
+// useEffect(() => {
+//   const interval = setInterval(() => {
+//     setWavelengths(
+//       wavelengths.map((channel) =>
+//         channel.map(() => (Math.random() > 0.5 ? 1 : 0))
+//       )
+//     );
+//   }, 1000);
+
+//   return () => clearInterval(interval);
+// }, [wavelengths]);
