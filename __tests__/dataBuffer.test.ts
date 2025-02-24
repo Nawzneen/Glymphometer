@@ -2,7 +2,7 @@ import {
   addToDataBuffer,
   getDataBuffer,
   clearDataBuffer,
-} from "@/utils/dataBuffer"; // Adjust path if needed
+} from "@/utils/buffers/dataBuffer"; // Adjust path if needed
 
 describe("dataBuffer utilities", () => {
   beforeEach(() => {

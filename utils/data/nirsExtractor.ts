@@ -1,4 +1,4 @@
-import { addToNirsData } from "@/utils/data/nirsData";
+import { addToNirsData } from "@/utils/buffers/nirsDataBuffer";
 import { PACKET_SIZE } from "@/constants/Constants";
 
 /**
@@ -19,7 +19,7 @@ import { PACKET_SIZE } from "@/constants/Constants";
  */
 const NIRS_MINI_BLOCKS = 13; // Each packet contains 13 mini-blocks
 const extractNirsData = (packet: number[]) => {
-  console.log("extractNirsData");
+  // console.log("extractNirsData");
   if (packet.length < PACKET_SIZE) {
     console.error("Packet is too short.");
     return;
@@ -49,14 +49,15 @@ const extractNirsData = (packet: number[]) => {
     // - First 4 values belong to channel 1 (wavelengths 1-4)
     // - Next 4 values belong to channel 2 (wavelengths 1-4)
     // - Last 4 values belong to channel 3 (wavelengths 1-4)
+
     const formattedNirsData = [
       nirsValues.slice(0, 4),
       nirsValues.slice(4, 8),
       nirsValues.slice(8, 12),
     ];
 
-    // Add this mini-block's data to the global NirsData structure,
-    // ensuring each channel's wavelength gets its own array of values.
+    // // Add this mini-block's data to the global NirsData structure,
+    // // ensuring each channel's wavelength gets its own array of values.
     addToNirsData(formattedNirsData);
   }
 };

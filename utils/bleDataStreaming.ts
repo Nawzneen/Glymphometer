@@ -21,7 +21,7 @@ import {
   TX_CHARACTERISTIC_UUID,
 } from "@/utils/bleConstants";
 
-import { addToDataBuffer } from "@/utils/dataBuffer";
+import { addToDataBuffer } from "@/utils/buffers/dataBuffer";
 import extractNirsData from "@/utils/data/nirsExtractor";
 
 type PacketStats = {

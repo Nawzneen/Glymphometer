@@ -24,16 +24,6 @@ export const addToNirsData = (dataChunk: number[][]) => {
       }
     }
   }
-  // try {
-  //   for (let ch = 0; ch < 3; ch++) {
-  //     for (let wl = 0; wl < 4; wl++) {
-  //       nirsData[ch][wl].push(dataChunk[ch][wl]);
-  //     }
-  //   }
-  // } catch (error) {
-  //   console.error("Error adding data to Nirs Data array", error);
-  // }
-  //   console.log("Nirs Data:", nirsData);
 };
 
 export const clearNirsData = () => {

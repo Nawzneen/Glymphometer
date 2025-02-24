@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
 import * as FileSystem from "expo-file-system";
 import { handleError } from "@/utils/handleError";
-import { postProcessData } from "@/utils/postProcessData";
+import { postProcessData } from "@/utils/data/postProcessData";
 import { Alert } from "react-native";
 import {
   FlatList,
@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { createFolder } from "@/utils/saveData";
+import { createFolder } from "@/utils/data/saveData";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Toast from "react-native-toast-message";
 import FileInfoModal from "@/components/modals/FileInfoModal";

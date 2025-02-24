@@ -10,7 +10,7 @@ jest.mock("expo-file-system", () => ({
     Base64: "base64",
   },
 }));
-import { saveDataToFile, createFolder } from "@/utils/saveData";
+import { saveDataToFile, createFolder } from "@/utils/data/saveData";
 import * as FileSystem from "expo-file-system";
 import Toast from "react-native-toast-message";
 import { handleError } from "@/utils/handleError";

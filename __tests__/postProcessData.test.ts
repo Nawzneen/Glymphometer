@@ -1,5 +1,5 @@
 import * as FileSystem from "expo-file-system";
-import { postProcessData } from "@/utils/postProcessData";
+import { postProcessData } from "@/utils/data/postProcessData";
 jest.mock("expo-file-system", () => ({
   readAsStringAsync: jest.fn(),
   EncodingType: { Base64: "base64" },

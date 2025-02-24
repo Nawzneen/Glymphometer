@@ -9,8 +9,8 @@ import React, {
   SetStateAction,
 } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
-import { saveDataToFile } from "@/utils/saveData";
+import { getDataBuffer, clearDataBuffer } from "@/utils/buffers/dataBuffer";
+import { saveDataToFile } from "@/utils/data/saveData";
 import Foundation from "@expo/vector-icons/Foundation";
 import ChooseFileNameModal from "./modals/ChooseFileNameModal";
 import { AppState } from "react-native";

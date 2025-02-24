@@ -1,15 +1,12 @@
 import { FC, useEffect, useState } from "react";
 import { View, SafeAreaView, Text, StyleSheet } from "react-native";
 import { runSQA } from "@/utils/signalQaulityAnalysis/SQA";
-import { getNirsData } from "@/utils/data/nirsDataBuffer";
+import { getNirsData } from "@/utils/buffers/nirsDataBuffer";
 const signalQuality: FC = () => {
   const [wavelengths, setWavelengths] = useState<number[][]>(
     Array(3).fill(Array(4).fill(0))
   );
   const [sqaScore, setSqaScore] = useState<number[]>(Array(12).fill(0));
-
-  // A pointer for the start of the SQA window
-  const [sqaStartIndex, setSqaStartIndex] = useState<number>(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,15 +20,9 @@ const signalQuality: FC = () => {
         setSqaScore(currentScores);
       }
     }, 20000);
-    // console.log("signal quality useeffect running");
-    // const nirsLength = getNirsData()[0][0].length;
-    // if (nirsLength >= sqaStartIndex + 2500) {
-    //   const currentScores = runSQA(sqaStartIndex);
-    //   setSqaScore(currentScores);
-    //   setSqaStartIndex((prev) => prev + 250);
-    // }
     return () => clearInterval(interval);
-  }, [sqaStartIndex]);
+  }, []);
+
   return (
     <SafeAreaView className="flex-1">
       <View className="py-4 flex flex-row justify-center items-center gap-x-2 bg-primary-color">

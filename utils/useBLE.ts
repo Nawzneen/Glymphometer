@@ -3,7 +3,7 @@ import Toast from "react-native-toast-message";
 import { requestPermissions } from "@/utils/requestPermissions";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { connectToDevice, disconnectDevice } from "@/utils/bleConnection";
-import { getDataBuffer, clearDataBuffer } from "@/utils/dataBuffer";
+import { getDataBuffer, clearDataBuffer } from "@/utils/buffers/dataBuffer";
 import { DATA_SERVICE_UUID } from "@/utils/bleConstants";
 import { adjustLEDLevel } from "@/utils/bleAdjustLEDLevel";
 import { BleError, Device, Subscription } from "react-native-ble-plx";
@@ -14,7 +14,7 @@ import {
 import bleManager from "@/utils/bleManager";
 import { Alert } from "react-native";
 import { Buffer } from "buffer";
-import { saveDataToFile } from "./saveData";
+import { saveDataToFile } from "@/utils/data/saveData";
 import { Command } from "@/constants/Constants";
 
 if (typeof global.Buffer === "undefined") {

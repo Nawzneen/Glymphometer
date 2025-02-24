@@ -5,7 +5,7 @@ import {
 } from "@/utils/bleDataStreaming";
 import { handleError } from "@/utils/handleError";
 import Toast from "react-native-toast-message";
-import { addToDataBuffer } from "@/utils/dataBuffer";
+import { addToDataBuffer } from "@/utils/buffers/dataBuffer";
 import base64 from "react-native-base64";
 import {
   BleError,
