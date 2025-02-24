@@ -26,5 +26,8 @@ actions-runner/
 assets/textFiles/*
 
 utils/saveManually.ts
+utils/signalQaulityAnalysis/backup.txt
+utils/signalQaulityAnalysis/manualFilters.ts
+utils/signalQaulityAnalysis/SQA.ts
 
 dataConverterV3.ts
