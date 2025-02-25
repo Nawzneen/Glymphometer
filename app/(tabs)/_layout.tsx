@@ -7,6 +7,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import Header from "@/components/Header"; // Import your custom Header component
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { AppProvider } from "@/contexts/AppContext";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -14,62 +15,63 @@ export default function TabLayout() {
     <View className="flex flex-1 bg-gray-100">
       {/* Custom Header Component */}
       <Header />
-
-      {/* Tabs at the bottom */}
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: "orange", // Set the active tab color to orange
-          tabBarInactiveTintColor: "gray", // Set the inactive tab color to gray
-          headerShown: false, // Hide the header for the individual screens
-        }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: "Connect",
-            tabBarIcon: ({ color, focused }) => (
-              // <TabBarIcon
-              //   name={focused ? "code-slash" : "code-slash-outline"}
-              //   color={color}
-              // />
-              <FontAwesome6
-                name="connectdevelop"
-                size={24}
-                color={focused ? "orange" : "black"}
-              />
-            ),
+      <AppProvider>
+        {/* Tabs at the bottom */}
+        <Tabs
+          screenOptions={{
+            tabBarActiveTintColor: "orange", // Set the active tab color to orange
+            tabBarInactiveTintColor: "gray", // Set the inactive tab color to gray
+            headerShown: false, // Hide the header for the individual screens
           }}
-        />
-        <Tabs.Screen
-          name="signalQuality"
-          options={{
-            title: "SQA",
-            tabBarIcon: ({ color, focused }) => (
-              <TabBarIcon
-                name={focused ? "code-slash" : "code-slash-outline"}
-                color={focused ? "orange" : "black"}
-              />
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="savedFiles"
-          options={{
-            title: "Saved Files",
-            tabBarIcon: ({ color, focused }) => (
-              <AntDesign
-                name="filetext1"
-                size={24}
-                color={focused ? "orange" : "black"}
-              />
-              // <TabBarIcon
-              //   name={focused ? "code-slash" : "code-slash-outline"}
-              //   color={color}
-              // />
-            ),
-          }}
-        />
-      </Tabs>
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "Connect",
+              tabBarIcon: ({ color, focused }) => (
+                // <TabBarIcon
+                //   name={focused ? "code-slash" : "code-slash-outline"}
+                //   color={color}
+                // />
+                <FontAwesome6
+                  name="connectdevelop"
+                  size={24}
+                  color={focused ? "orange" : "black"}
+                />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="signalQuality"
+            options={{
+              title: "SQA",
+              tabBarIcon: ({ color, focused }) => (
+                <TabBarIcon
+                  name={focused ? "code-slash" : "code-slash-outline"}
+                  color={focused ? "orange" : "black"}
+                />
+              ),
+            }}
+          />
+          <Tabs.Screen
+            name="savedFiles"
+            options={{
+              title: "Saved Files",
+              tabBarIcon: ({ color, focused }) => (
+                <AntDesign
+                  name="filetext1"
+                  size={24}
+                  color={focused ? "orange" : "black"}
+                />
+                // <TabBarIcon
+                //   name={focused ? "code-slash" : "code-slash-outline"}
+                //   color={color}
+                // />
+              ),
+            }}
+          />
+        </Tabs>
+      </AppProvider>
     </View>
   );
 }

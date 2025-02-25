@@ -1,6 +1,5 @@
 import React from "react";
 import { Slot } from "expo-router";
-import { AuthProvider } from "@/contexts/AuthContext";
 
 export default function SavedFilesLayout({
   children,
@@ -8,8 +7,8 @@ export default function SavedFilesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <Slot />
-    </AuthProvider>
+    // <BLEProvider>
+    <Slot />
+    // </BLEProvider>
   );
 }

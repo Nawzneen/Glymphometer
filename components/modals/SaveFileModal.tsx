@@ -9,14 +9,14 @@ import {
 } from "react-native";
 import CustomButton from "@/components/CustomButton";
 import { Keyboard } from "react-native";
-interface ChooseFileNameModalProps {
+interface SaveFileModalProps {
   visible: boolean;
   onSave: (fileName: string) => void;
   onDiscard: () => void;
   isLoading: boolean;
 }
 
-const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
+const SaveFileModal: React.FC<SaveFileModalProps> = ({
   visible,
   onSave,
   onDiscard,
@@ -69,7 +69,7 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
         >
           <SafeAreaView className="flex-1 bg-[#ffffff] justify-center items-center">
             <View className=" rounded-md ">
-              <Text className="text-lg font-bold">Write the file name:</Text>
+              <Text className="text-lg font-bold">Enter the file name:</Text>
               <View className="bg-gray-100 mt-8 rounded-md">
                 <TextInput
                   className="p-3 text-lg "
@@ -79,6 +79,11 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
                   autoFocus
                 />
               </View>
+              {isLoading && (
+                <View className="mt-4">
+                  <Text>Saving. This might take a few seconds.</Text>
+                </View>
+              )}
               <View className="flex flex-row justify-center items-center gap-x-4 mt-8">
                 <View>
                   <CustomButton
@@ -104,4 +109,4 @@ const ChooseFileNameModal: React.FC<ChooseFileNameModalProps> = ({
   );
 };
 
-export default ChooseFileNameModal;
+export default SaveFileModal;
