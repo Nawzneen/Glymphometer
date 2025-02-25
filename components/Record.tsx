@@ -12,9 +12,9 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { getDataBuffer, clearDataBuffer } from "@/utils/buffers/dataBuffer";
 import { saveDataToFile } from "@/utils/data/saveData";
 import Foundation from "@expo/vector-icons/Foundation";
-import ChooseFileNameModal from "./modals/ChooseFileNameModal";
+import SaveFileModal from "@/components/modals/SaveFileModal";
 import { AppState } from "react-native";
-
+import { useAppContext } from "@/contexts/AppContext";
 interface RecordProps {
   isDataStreaming: boolean;
   isRecordingRef: MutableRefObject<boolean>;
@@ -34,9 +34,12 @@ const Record: FC<RecordProps> = ({
 }) => {
   const [duration, setDuration] = useState<number>(0);
   const [error, setError] = useState<string>("");
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  // Timer to calculate the duration of recording
   const [startTime, setStartTime] = useState<number | null>(null);
+  //  to disable the Save or Discard buttons when saving data
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { saveFileModalVisible, setSaveFileModalVisible } = useAppContext();
+  console.log("called isSAvingFile from context");
   // Handle changes in data streaming or recording
   useEffect(() => {
     setError("");
@@ -111,7 +114,7 @@ const Record: FC<RecordProps> = ({
       setIsRecordingPaused(true);
       isRecordingRef.current = false;
       setStartTime(null); // Clear start time
-      setModalVisible(true); // Show modal to save/discard data
+      setSaveFileModalVisible(true); // Show modal to save/discard data
     }
   }
   // Discard Data
@@ -120,7 +123,7 @@ const Record: FC<RecordProps> = ({
     setIsRecordingPaused(false);
     setDuration(0);
     clearDataBuffer();
-    setModalVisible(false);
+    setSaveFileModalVisible(false);
   }
 
   // Save Data
@@ -134,7 +137,7 @@ const Record: FC<RecordProps> = ({
       setIsRecording(false);
       setDuration(0);
       clearDataBuffer();
-      setModalVisible(false);
+      setSaveFileModalVisible(false);
     } catch (error) {
       // handleError(error, "Error saving data");
       setError("Error saving data to file");
@@ -155,7 +158,7 @@ const Record: FC<RecordProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               className=""
-              onPress={() => setModalVisible(true)}
+              onPress={() => setSaveFileModalVisible(true)}
             >
               <Ionicons name="checkmark-circle" size={60} color={"black"} />
             </TouchableOpacity>
@@ -202,8 +205,8 @@ const Record: FC<RecordProps> = ({
       {error ? <Text className="text-red-500 mt-2">{error}</Text> : null}
 
       {/* Modal for choosing file name */}
-      <ChooseFileNameModal
-        visible={modalVisible}
+      <SaveFileModal
+        visible={saveFileModalVisible}
         onSave={handleSaveData}
         onDiscard={discardData}
         isLoading={isLoading}
