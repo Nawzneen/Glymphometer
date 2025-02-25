@@ -16,7 +16,7 @@ import { Alert } from "react-native";
 import { Buffer } from "buffer";
 import { saveDataToFile } from "@/utils/data/saveData";
 import { Command } from "@/constants/Constants";
-
+import { useAppContext } from "@/contexts/AppContext";
 if (typeof global.Buffer === "undefined") {
   global.Buffer = Buffer;
 }
@@ -29,6 +29,8 @@ type PacketStats = {
 };
 
 function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
+  const { saveFileModalVisible } = useAppContext();
+  console.log("called isSavingFile from context in BLE", saveFileModalVisible);
   const [allDevices, setAllDevices] = useState<Device[]>([]); //Track all discovered devices
   // const [packet, setPacket] = useState<string>(""); //Track the received data packet
   const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); //Track currently connected device
@@ -162,9 +164,11 @@ function useBLE(isRecordingRef: React.MutableRefObject<boolean>) {
             dataSubscription.current.remove();
             dataSubscription.current = null;
           }
-          if (isRecordingRef.current) {
+          // if deviced turned off or disconnected during recording, or when the SaveFileModal  is open, save the file automatically
+          if (isRecordingRef.current || saveFileModalVisible) {
             try {
               const dataBuffer = getDataBuffer();
+              console.log("Auto-Saving data after disconnection");
               await saveDataToFile(dataBuffer, "AutoSave");
               Toast.show({
                 type: "success",
