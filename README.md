@@ -1,50 +1,109 @@
-# Welcome to your Expo app 👋
+# Glymphometer Application (GlymphoLink)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The development of the Glymphometer application (GlymphoLink) has moved to a private repository for legal and proprietary reasons. This public repository does not contain the latest changes or sensitive configuration details such as Firebase credentials.
 
-## Get started
+This application requires a physical device called the Glymphometer, developed within the OPEM research group at the University of Oulu. The device is a Bluetooth Low Energy (BLE) sensor suite that measures various brain activities. The mobile application communicates with these BLE devices and provides features including:
 
-1. Install dependencies
+- Data Streaming
+- Adjusting the LED light
+- Data recording and storage
+- Real-time processing of incoming packets
+- Post-processing of stored packets
+- Signal quality analysis of incoming NIRS data
+- Demonstrating packet loss and buffering status
+- Uploading data to a database via API endpoints for further research
+
+---
+
+<p>
+    <img src="https://github.com/user-attachments/assets/7a37e259-3874-4e1b-9de0-f70fbe12d51f" width="240" hspace="3" >
+    <img src="https://github.com/user-attachments/assets/6e03cb5e-83ea-490c-a266-aac2a3259a09" width="240" hspace="3" >
+   <img src="https://github.com/user-attachments/assets/16612a4a-1966-4692-9f97-5d5130c3539c"  width="240" hspace="3" >
+   <img src="https://github.com/user-attachments/assets/09971ece-5002-47d9-a979-d27202a0aab4"  width="240" hspace="3" >
+</p>
+<p>   
+   <img src="https://github.com/user-attachments/assets/3bceeeb0-99b8-4cdf-b3da-52c5cc1bde69"  width="240"  hspace="3" > 
+   <img src="https://github.com/user-attachments/assets/59f56723-8de1-43e3-b5e3-9d35026a1845"  width="240"  hspace="3" >
+   <img src="https://github.com/user-attachments/assets/9711c8d9-0bf6-42d0-9761-fc6d89fa96d7" width="240"  hspace="3" >
+</p>
+
+
+
+
+
+
+## Prerequisites
+
+- A physical Glymphometer device (full features require the hardware).
+- A development environment set up with Node.js and npm.
+- An Android device with USB debugging enabled.
+- A Firebase project for backend services.
+
+> **Note:** This repository does not include the Firebase configuration or the `.env` file, as these contain sensitive information that should not be publicly available. You must create and configure these locally.
+
+---
+
+## Environment Setup
+
+### Firebase Configuration
+
+1. **Create a Firebase Project:**  
+   If you haven’t already, go to [Firebase Console](https://console.firebase.google.com/) and create a new project.
+
+2. **Obtain Configuration Details:**  
+   In your Firebase project settings, find your Firebase configuration keys (e.g., `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, etc.).
+
+3. **Create a `.env` File:**  
+   In the root directory of your project, create a file named `.env` and add your Firebase configuration. For example:
 
    ```bash
-   npm install
-   ```
+   # .env file example
+   FIREBASE_API_KEY=your_api_key
+   FIREBASE_PROJECT_ID=your_project_id
+   FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   FIREBASE_APP_ID=your_app_id
 
-2. Start the app
 
-   ```bash
-    npx expo start
-   ```
+## Get Started
 
-In the output, you'll find options to open the app in a
+#Clone the Repository:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+git clone [<repository_url>](https://github.com/Nawzneen/Glymphometer/)
+cd Glymphometer
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+#Install Dependencies:
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```
+bash
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Connect Your Android Device:
 
-## Learn more
+   1.Connect your phone via USB.
+   2. Enable Developer Mode and USB Debugging on your phone ([instructions](https://developer.android.com/studio/debug/dev-options)).
 
-To learn more about developing your project with Expo, look at the following resources:
+### Run the Application:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+    npx expo run:android
 
-## Join the community
+### Begin Development:
+    With the application running on your device, you can now start modifying and testing your code.
 
-Join our community of developers creating universal apps.
+### Building the APK Package
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+To build an APK package for Android devices, run:
+```build
+eas build -p android --profile preview
+```
+This command uses Expo Application Services (EAS) to build your app. Ensure your EAS configuration is set up properly before running the build.
+Additional Notes
+
+### Security:
+    Sensitive data like Firebase credentials is stored in a .env file which is excluded from version control. Make sure you maintain this practice to protect your configuration details.
+
+### Repository Management:
+    Since the repository does not include the latest changes and sensitive packages, make sure you coordinate with your team to obtain any missing components or private configurations if needed.
+
+### BLE-PLX Library:
+    The application uses the BLE-PLX library, and development is performed on a custom app (not the Expo managed workflow).
