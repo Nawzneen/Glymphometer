@@ -17,15 +17,18 @@ This application requires a physical device called the Glymphometer, developed w
 
 <p>
     <img src="https://github.com/user-attachments/assets/7a37e259-3874-4e1b-9de0-f70fbe12d51f" width="240" hspace="3" >
+    <img src="https://github.com/user-attachments/assets/fa002e76-72f2-461e-8c8a-801454dde7bb"  width="240" hspace="3" >
     <img src="https://github.com/user-attachments/assets/6e03cb5e-83ea-490c-a266-aac2a3259a09" width="240" hspace="3" >
    <img src="https://github.com/user-attachments/assets/16612a4a-1966-4692-9f97-5d5130c3539c"  width="240" hspace="3" >
-   <img src="https://github.com/user-attachments/assets/09971ece-5002-47d9-a979-d27202a0aab4"  width="240" hspace="3" >
+   
 </p>
 <p>   
+    <img src="https://github.com/user-attachments/assets/09971ece-5002-47d9-a979-d27202a0aab4"  width="240" hspace="3" >
    <img src="https://github.com/user-attachments/assets/3bceeeb0-99b8-4cdf-b3da-52c5cc1bde69"  width="240"  hspace="3" > 
    <img src="https://github.com/user-attachments/assets/59f56723-8de1-43e3-b5e3-9d35026a1845"  width="240"  hspace="3" >
    <img src="https://github.com/user-attachments/assets/9711c8d9-0bf6-42d0-9761-fc6d89fa96d7" width="240"  hspace="3" >
 </p>
+
 
 
 
